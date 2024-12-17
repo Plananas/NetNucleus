@@ -1,8 +1,7 @@
 import socket
 import threading
-from Message import MessageHandler
+from Models import Message
 import time
-
 
 class Client:
     def __init__(self):
@@ -24,7 +23,7 @@ class Client:
 
         try:
             #Message handler will deal with the sending of all messages.
-            self.messageHandler = MessageHandler(self.client)
+            self.messageHandler = Message(self.client)
             self.Connected = True
 
         except:
@@ -54,6 +53,7 @@ class Client:
         while self.Connected:
             try:
                 msg = self.messageHandler.read()
+                print(msg)
 
             except:
                 print("\n[CONNECTION ERROR] Disconnecting")
