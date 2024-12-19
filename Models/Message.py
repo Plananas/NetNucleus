@@ -1,32 +1,50 @@
 import socket
+import uuid
 
 class Message(object):
     FORMAT = 'utf-8'
     HEADER = 64
 
-    def __init__(self, _conn):
-        self.conn = _conn
+    def __init__(self, connection):
+        self.connection = connection
+        self.messageId = str(uuid.uuid4())[:8]
 
     # Read the message sent from the client.
     def read(self):
         messages = []
-        msg_length = self.conn.recv(self.HEADER).decode(self.FORMAT)
-        msg_length = int(msg_length)
-        if msg_length:
-            messages.append(self.conn.recv(msg_length))
-        # This will be the final decoded message!
+        msg_length = self.connection.recv(self.HEADER).decode(self.FORMAT).strip()
         try:
-            message = messages[0].decode('utf-8')
+            msg_length = int(msg_length)
+        except ValueError:
+            return "Invalid message length received"
+        received_bytes = 0
+        message_parts = []
 
-            return str(message)
-        except:
-            return("Error Decoding Message")
+        while received_bytes < msg_length:
+            part = self.connection.recv(min(msg_length - received_bytes, 1024))
+            if not part:
+                break
+            message_parts.append(part)
+            received_bytes += len(part)
+        fullMessage = b''.join(message_parts)
+
+        try:
+            fullMessage = fullMessage.decode(self.FORMAT)
+        except UnicodeDecodeError:
+            return "Error Decoding Message"
+
+        sender_id, content = fullMessage.split(":", 1)
+        # Ignore messages sent by this client
+        if sender_id != self.messageId:
+            return content
 
     # write a message to the client.
     def write(self, message):
 
-        msg_length = len(message)
-        send_length = str(msg_length).encode(self.FORMAT)
-        send_length += b' ' * (self.HEADER - len(send_length))
-        self.conn.send(send_length)
-        self.conn.send(message)
+        fullMessage = f"{self.messageId}:{message}"
+        messageLength = len(fullMessage)
+        sendLength = str(messageLength).encode(self.FORMAT)
+        sendLength += b' ' * (self.HEADER - len(sendLength))
+        self.connection.send(sendLength)
+        self.connection.send(fullMessage.encode(self.FORMAT))
+

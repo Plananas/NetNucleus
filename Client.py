@@ -1,6 +1,6 @@
 import socket
 import threading
-from Models import Message
+from Models.Message import Message
 import time
 
 class Client:
@@ -10,7 +10,7 @@ class Client:
         self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.DISCONNECT_MESSAGE = "goodbye"
-        self.messageHandler = 0
+        self.message = Message(object)
         self.Connected = False
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -23,38 +23,27 @@ class Client:
 
         try:
             #Message handler will deal with the sending of all messages.
-            self.messageHandler = Message(self.client)
+            self.message = Message(self.client)
             self.Connected = True
 
         except:
+            print("Error creating the message Handler")
             self.Connected = False
 
-        threading.Thread(target=self.handle_server).start()
+        self.handleServer()
 
-        # main runtime loop while we are connected.
-        while self.Connected:
-            try:
-                # gets us to enter the message
-                # ive added a slight delay to let the server process what we've sent and come up with a response
-                message = ""
-                time.sleep(1)
-                message = str(input("[ENTER MESSAGE] "))
-                client.send(message)
-                if message == "!DISCONNECT":
-                    self.connected = False
-                    break
-            except:
-                print("\n[CONNECTION ERROR] Disconnecting")
-                self.connected = False
-                break
-
-    def handle_server(self):
+    def handleServer(self):
+        print("\n[LISTENING FOR MESSAGES]")
         # Constantly listening to the server for messages.
         while self.Connected:
             try:
-                msg = self.messageHandler.read()
-                print(msg)
+                msg = self.message.read()
 
+                try:
+                    self.processMessage(msg)
+                    self.send("Process Completed")
+                except:
+                    print("Error processing message")
             except:
                 print("\n[CONNECTION ERROR] Disconnecting")
                 self.connected = False
@@ -68,7 +57,10 @@ class Client:
             # empty strings caused my encryption to give out bad results so ive added this to the client
             print("please dont send empty strings... it breaks the server.")
         else:
-            write = self.messageHandler.write(msg)
+            write = self.message.write(msg)
+
+    def processMessage(self, msg):
+        print("\n[MESSAGE PROCESSING]")
 
 # let's run out client!!!!
 client = Client()
