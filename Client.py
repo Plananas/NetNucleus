@@ -1,4 +1,5 @@
 import socket
+import os
 import threading
 from Models.Message import Message
 import time
@@ -7,7 +8,9 @@ class Client:
     def __init__(self):
         # all the client's attributes
         self.PORT = 50000
-        self.SERVER = socket.gethostbyname(socket.gethostname())
+        self.SERVER = ""
+        print("Input the address of the server")
+        self.SERVER = input("> ")
         self.ADDR = (self.SERVER, self.PORT)
         self.DISCONNECT_MESSAGE = "goodbye"
         self.message = Message(object)
@@ -15,7 +18,6 @@ class Client:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
-        # try to connect first
         try:
             self.client.connect(self.ADDR)
         except:
@@ -59,8 +61,14 @@ class Client:
         else:
             write = self.message.write(msg)
 
-    def processMessage(self, msg):
+    def processMessage(self, message):
         print("\n[MESSAGE PROCESSING]")
+        if message.lower() == "shutdown":
+            self.shutdown()
+
+
+    def shutdown(self):
+        os.system('shutdown -s')
 
 # let's run out client!!!!
 client = Client()
