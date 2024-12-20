@@ -66,6 +66,8 @@ class Client:
             return SystemFunctions.shutdown()
         if message.lower() == "upgrades":
             return SystemFunctions.getUpdatableSoftware()
+        if message.lower() == "software":
+            return SystemFunctions.getAllSoftware()
 
 # let's run out client!!!!
 client = Client()

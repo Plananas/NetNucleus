@@ -76,7 +76,8 @@ class Server:
             return clientHandler.shutdown()
         elif message.lower() == "upgrades":
             return clientHandler.getUpdate()
-
+        elif message.lower() == "software":
+            return clientHandler.getAllSoftware()
 
 # let's start the server!
 print("[STARTING]")

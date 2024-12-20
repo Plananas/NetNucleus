@@ -5,6 +5,7 @@ class ClientHandler:
 
     SHUTDOWN_COMMAND = "shutdown"
     GET_UPGRADES_COMMAND = "upgrades"
+    GET_ALL_SOFTWARE_COMMAND = "software"
 
     def __init__(self, client):
         self.client: Message = client
@@ -32,9 +33,9 @@ class ClientHandler:
 
     def getAllSoftware(self):
         """
-        :return: Array of Software available to update
+        :return: Array of Software
         """
-        self.client.write(self.GET_UPGRADES_COMMAND )
+        self.client.write(self.GET_ALL_SOFTWARE_COMMAND )
 
         responseArray = self.read()
 
