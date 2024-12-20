@@ -2,7 +2,7 @@ import socket
 from getmac import get_mac_address
 import uuid
 
-class Message(object):
+class MessageController(object):
     FORMAT = 'utf-8'
     HEADER = 64
 

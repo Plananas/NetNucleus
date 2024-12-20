@@ -1,19 +1,18 @@
 import socket
 import Client.SystemFunctions as SystemFunctions
 import threading
-from Models.Message import Message
+from Models.MessageController import MessageController
 import time
 
 class Client:
     def __init__(self):
         # all the client's attributes
         self.PORT = 50000
-        self.SERVER = ""
         #print("Input the address of the server")
         #self.SERVER = input("> ")
         self.SERVER = "10.130.94.3"
         self.ADDR = (self.SERVER, self.PORT)
-        self.message = Message(object)
+        self.message = MessageController(object)
         self.Connected = False
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -25,7 +24,7 @@ class Client:
 
         try:
             #Message handler will deal with the sending of all messages.
-            self.message = Message(self.client)
+            self.message = MessageController(self.client)
             self.Connected = True
 
         except:

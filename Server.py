@@ -2,7 +2,9 @@ import socket
 from typing import List
 import threading
 import time
-from Models.Message import Message
+
+from Models.ClientModel import ClientModel
+from Models.MessageController import MessageController
 from Server.ClientHandler import ClientHandler
 
 
@@ -28,7 +30,7 @@ class Server:
             conn, addr = self.server.accept()
             print(conn)
             print(addr)
-            clientHandler = ClientHandler(Message(conn))
+            clientHandler = ClientHandler(MessageController(conn))
             self.clients.append(clientHandler)
             self.ActiveConnections += 1
             print(f"Users Connected: {self.ActiveConnections}")
@@ -65,8 +67,8 @@ class Server:
                 # TODO for that client we need to process what happened
 
             except (socket.error, ConnectionResetError):
-                print(f"\n[CONNECTION ERROR] Client {clientHandler.client.messageId} disconnected.")
-                clientHandler.client.connection.close()
+                print(f"\n[CONNECTION ERROR] Client {clientHandler.messageController.messageId} disconnected.")
+                clientHandler.messageController.connection.close()
                 self.clients.remove(clientHandler)
                 self.ActiveConnections -= 1
 
