@@ -1,5 +1,5 @@
 import socket
-import os
+import Client.SystemFunctions as SystemFunctions
 import threading
 from Models.Message import Message
 import time
@@ -9,10 +9,10 @@ class Client:
         # all the client's attributes
         self.PORT = 50000
         self.SERVER = ""
-        print("Input the address of the server")
-        self.SERVER = input("> ")
+        #print("Input the address of the server")
+        #self.SERVER = input("> ")
+        self.SERVER = "10.130.94.3"
         self.ADDR = (self.SERVER, self.PORT)
-        self.DISCONNECT_MESSAGE = "goodbye"
         self.message = Message(object)
         self.Connected = False
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,8 +42,7 @@ class Client:
                 msg = self.message.read()
 
                 try:
-                    self.processMessage(msg)
-                    self.send("Process Completed")
+                    self.send(self.processMessage(msg))
                 except:
                     print("Error processing message")
             except:
@@ -64,11 +63,9 @@ class Client:
     def processMessage(self, message):
         print("\n[MESSAGE PROCESSING]")
         if message.lower() == "shutdown":
-            self.shutdown()
-
-
-    def shutdown(self):
-        os.system('shutdown -s')
+            return SystemFunctions.shutdown()
+        if message.lower() == "upgrades":
+            return SystemFunctions.getUpdatableSoftware()
 
 # let's run out client!!!!
 client = Client()

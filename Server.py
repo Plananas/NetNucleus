@@ -3,6 +3,8 @@ from typing import List
 import threading
 import time
 from Models.Message import Message
+from Server.ClientHandler import ClientHandler
+
 
 class Server:
 
@@ -12,7 +14,7 @@ class Server:
         self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.ActiveConnections = 0
-        self.clients: List[Message] = []
+        self.clients: List[ClientHandler] = []
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
@@ -26,8 +28,8 @@ class Server:
             conn, addr = self.server.accept()
             print(conn)
             print(addr)
-            client = Message(conn)
-            self.clients.append(client)
+            clientHandler = ClientHandler(Message(conn))
+            self.clients.append(clientHandler)
             self.ActiveConnections += 1
             print(f"Users Connected: {self.ActiveConnections}")
 
@@ -36,7 +38,9 @@ class Server:
             while True:
                 time.sleep(0.5)
                 message = input("> ")
+
                 if message.lower() == "exit":
+
                     print("\n[INFO] Exiting client controller.")
                     break
 
@@ -44,18 +48,35 @@ class Server:
                 time.sleep(1)
 
                 # Send the message to each client in the list
-                for index, client in enumerate(self.clients):
-                    try:
-                        print(index)
-                        client.write(message)
-                        print(f"[SENT] Message sent to client {index}")
-                    except (socket.error, ConnectionResetError):
-                        print(f"\n[CONNECTION ERROR] Client {index} disconnected.")
-                        client.connection.close()
-                        self.clients.remove(client)
-                        self.ActiveConnections -= 1
+                self.broadcast(message)
         except KeyboardInterrupt:
             print("\n[INFO] Interrupted by user. Exiting.")
+
+    def broadcast(self, message):
+        """
+        Broadcast to every connected client
+        :param message:
+        :return:
+        """
+
+        for index, clientHandler in enumerate(self.clients):
+            try:
+                print(self.processMessage(message, clientHandler))
+                # TODO for that client we need to process what happened
+
+            except (socket.error, ConnectionResetError):
+                print(f"\n[CONNECTION ERROR] Client {clientHandler.client.messageId} disconnected.")
+                clientHandler.client.connection.close()
+                self.clients.remove(clientHandler)
+                self.ActiveConnections -= 1
+
+    def processMessage(self, message, clientHandler):
+        print("\n[MESSAGE PROCESSING]")
+        if message.lower() == "shutdown":
+            return clientHandler.shutdown()
+        elif message.lower() == "upgrades":
+            return clientHandler.getUpdate()
+
 
 # let's start the server!
 print("[STARTING]")
