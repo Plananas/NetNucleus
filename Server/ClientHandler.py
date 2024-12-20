@@ -30,5 +30,18 @@ class ClientHandler:
 
         return responseArray
 
+    def getAllSoftware(self):
+        """
+        :return: Array of Software available to update
+        """
+        self.client.write(self.GET_UPGRADES_COMMAND )
+
+        responseArray = self.read()
+
+        for response in responseArray:
+            print(response)
+
+        return responseArray
+
     def read(self):
         return {self.client.getMacAddress(): self.client.read()}

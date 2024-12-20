@@ -33,5 +33,29 @@ def getUpdatableSoftware():
 
     return updatableSoftware
 
+def getAllSoftware():
+    print("Getting all installed software...")
+    result = subprocess.run(['winget', 'list'], capture_output=True, text=True)
 
+    # Initialize an empty list to store software details
+    installedSoftware = []
+
+    # Split the output into lines
+    outputLines = result.stdout.splitlines()
+
+    # Skip the first two lines (headers and separators)
+    for line in outputLines[2:]:
+        # Split each line into parts based on 2 or more spaces
+        softwareDetails = re.split(r'\s{2,}', line.strip())
+
+        # Ensure the line has at least 3 parts: Name, ID, and Version
+        if len(softwareDetails) >= 3:
+            softwareEntry = {
+                'name': softwareDetails[0],
+                'id': softwareDetails[1],
+                'version': softwareDetails[2],
+            }
+            installedSoftware.append(softwareEntry)
+
+    return installedSoftware
 
