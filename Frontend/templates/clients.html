@@ -3,12 +3,18 @@
 {% block title %}Clients{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/clients.css') }}">
     <h2>Clients List</h2>
-    <ul>
+    <div class="clients-container">
         {% for client in clients %}
-            <li>{{ client.nickname or client.mac_address }}</li>
+            <div class="client-box">
+                <img src="{{ url_for('static', filename='images/computer-icon.png') }}" alt="Client Image" class="client-image">
+                <div class="client-info">
+                    <p>{{ client.nickname or client.mac_address }}</p>
+                </div>
+            </div>
         {% else %}
-            <li>No clients available.</li>
+            <p>No clients available.</p>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

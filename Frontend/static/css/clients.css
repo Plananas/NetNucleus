@@ -1,0 +1,33 @@
+/* clients.css */
+
+.clients-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Center align the client boxes */
+    padding: 20px;
+}
+
+.client-box {
+    display: flex; /* Arrange image and content side by side */
+    align-items: center; /* Align image and text vertically */
+    background-color: #f4f4f4; /* Light background for the box */
+    border: 1px solid #ccc; /* Border around the box */
+    border-radius: 10px; /* Rounded corners */
+    width: 200px; /* Set a fixed width for each box */
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for the box */
+}
+
+.client-image {
+    width: 50px; /* Set the image size */
+    height: 50px; /* Set the image size */
+    margin-right: 15px; /* Add spacing between the image and text */
+}
+
+.client-info p {
+    font-size: 14px;
+    font-weight: bolder;
+    color: #333;
+    margin: 0; /* Remove default paragraph margin */
+}

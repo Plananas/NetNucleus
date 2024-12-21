@@ -1,5 +1,5 @@
 import socket
-from Backend.App import Client as SystemFunctions
+import Backend.App.Client.SystemFunctions as SystemFunctions
 from Backend.App.Models.MessageController import MessageController
 import time
 
@@ -41,6 +41,7 @@ class Client:
                 msg = self.message.read()
 
                 try:
+                    print("[READING MESSAGE]", msg)
                     self.send(self.processMessage(msg))
                 except:
                     print("Error processing message")

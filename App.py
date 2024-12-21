@@ -13,7 +13,7 @@ def home():
     """Render the home page."""
     return render_template('home.html')
 
-@main.route('/clients', methods=['GET'])
+@main.route('/api/clients', methods=['GET'])
 def get_clients():
     """Endpoint to return the list of clients."""
     client_repository = ClientRepository()
@@ -22,6 +22,16 @@ def get_clients():
     clients = [client.to_dict() for client in client_repository.get_all_clients()]
 
     return jsonify(clients), 200
+
+@main.route('/clients', methods=['GET'])
+def get_clients_page():
+    """Endpoint to return the list of clients."""
+    client_repository = ClientRepository()
+
+    # Convert list of ClientModel instances to list of dictionaries
+    clients = [client.to_dict() for client in client_repository.get_all_clients()]
+
+    return render_template('clients.html', clients=clients)
 
 
 @main.route('/clients/name/<string:client_name>', methods=['GET'])
@@ -43,6 +53,6 @@ if __name__ == '__main__':
 
     # Create a thread for the server's run method
     server_thread = threading.Thread(target=ServerProcess().run).start()
-    app = Flask(__name__, template_folder='frontend/templates')
+    app = Flask(__name__, static_folder='Frontend/static', template_folder='frontend/templates')
     app.register_blueprint(main)  # Register the blueprint to the app
     app.run(debug=True)
