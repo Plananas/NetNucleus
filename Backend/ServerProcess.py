@@ -3,21 +3,21 @@ from typing import List
 import threading
 import time
 
-from Models.ClientModel import ClientModel
 from Models.MessageController import MessageController
 from Server.ClientHandler import ClientHandler
 
 
-class Server:
+class ServerProcess:
+    PORT = 50000
 
-    def __init__(self, port=50000):
+    def __init__(self):
         # all the attributes of the server
-        self.PORT = port
         self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.ActiveConnections = 0
         self.clients: List[ClientHandler] = []
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     def run(self):
 
@@ -80,8 +80,3 @@ class Server:
             return clientHandler.getUpdate()
         elif message.lower() == "software":
             return clientHandler.getAllSoftware()
-
-# let's start the server!
-print("[STARTING]")
-theServer = Server()
-theServer.run()

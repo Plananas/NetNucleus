@@ -10,7 +10,8 @@ class Client:
         self.PORT = 50000
         #print("Input the address of the server")
         #self.SERVER = input("> ")
-        self.SERVER = "10.130.94.3"
+       # self.SERVER = "10.130.94.3"
+        self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.message = MessageController(object)
         self.Connected = False

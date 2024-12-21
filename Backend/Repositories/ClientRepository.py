@@ -16,6 +16,11 @@ class ClientRepository:
         return ClientModel.get(mac_address=mac_address)
 
     @staticmethod
+    def get_client_by_nickname(nickname: str) -> Optional[ClientModel]:
+        """Retrieve a client by nickname."""
+        return ClientModel.get(nickname=nickname)
+
+    @staticmethod
     def get_all_clients() -> List[ClientModel]:
         """Retrieve all clients from the database."""
         with ClientModel.get_connection() as conn:

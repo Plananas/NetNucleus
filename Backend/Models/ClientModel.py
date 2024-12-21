@@ -29,4 +29,14 @@ class ClientModel(Model):
     def setShutdown(self, shutdown: bool) -> None:
         self.shutdown = shutdown
 
-
+    def to_dict(self) -> dict:
+        """
+        Convert the object to a dictionary for JSON serialization.
+        """
+        return {
+            "mac_address": self.mac_address,
+            "nickname": self.nickname,
+            "shutdown": self.shutdown,
+            "installed_programs": self.installed_programs,
+            "updatable_programs": self.updatable_programs,
+        }

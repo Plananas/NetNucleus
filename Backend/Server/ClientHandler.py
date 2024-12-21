@@ -58,7 +58,7 @@ class ClientHandler:
         existingClient = clientRepository.get_client_by_mac_address(macAddress)
 
         if not existingClient:
-            print('client not found')
+            print('Client does not exist: Creating Model')
             self.clientModel: ClientModel = ClientModel(
                     mac_address = macAddress,
                     nickname = '',
