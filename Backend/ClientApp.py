@@ -1,7 +1,6 @@
 import socket
-import Client.SystemFunctions as SystemFunctions
-import threading
-from Models.MessageController import MessageController
+from Backend.App import Client as SystemFunctions
+from Backend.App.Models.MessageController import MessageController
 import time
 
 class Client:

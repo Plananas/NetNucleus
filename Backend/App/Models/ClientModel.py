@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from Models.Model import Model
+from Backend.App.Models.Model import Model
 
 
 class ClientModel(Model):

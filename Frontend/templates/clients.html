@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+    <h2>Clients List</h2>
+    <ul>
+        {% for client in clients %}
+            <li>{{ client.nickname or client.mac_address }}</li>
+        {% else %}
+            <li>No clients available.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

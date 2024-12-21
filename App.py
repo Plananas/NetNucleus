@@ -1,13 +1,19 @@
 from flask import Flask, jsonify
+from flask import Blueprint, render_template
 
-from Repositories.ClientRepository import ClientRepository
-from ServerProcess import ServerProcess
+from Backend.App.Repositories.ClientRepository import ClientRepository
+from Backend.App.ServerProcess import ServerProcess
 import threading
 
 
-app = Flask(__name__)
+main = Blueprint('main', __name__)
 
-@app.route('/clients', methods=['GET'])
+@main.route('/')
+def home():
+    """Render the home page."""
+    return render_template('home.html')
+
+@main.route('/clients', methods=['GET'])
 def get_clients():
     """Endpoint to return the list of clients."""
     client_repository = ClientRepository()
@@ -18,7 +24,7 @@ def get_clients():
     return jsonify(clients), 200
 
 
-@app.route('/clients/name/<string:client_name>', methods=['GET'])
+@main.route('/clients/name/<string:client_name>', methods=['GET'])
 def get_client_by_name(client_name):
     """Endpoint to return a single client by name."""
     client_repository = ClientRepository()
@@ -37,5 +43,6 @@ if __name__ == '__main__':
 
     # Create a thread for the server's run method
     server_thread = threading.Thread(target=ServerProcess().run).start()
-
+    app = Flask(__name__, template_folder='frontend/templates')
+    app.register_blueprint(main)  # Register the blueprint to the app
     app.run(debug=True)

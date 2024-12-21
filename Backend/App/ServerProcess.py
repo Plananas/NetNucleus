@@ -3,8 +3,8 @@ from typing import List
 import threading
 import time
 
-from Models.MessageController import MessageController
-from Server.ClientHandler import ClientHandler
+from Backend.App.Models.MessageController import MessageController
+from Backend.App.Server.ClientHandler import ClientHandler
 
 
 class ServerProcess:

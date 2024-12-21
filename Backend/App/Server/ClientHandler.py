@@ -1,6 +1,6 @@
-from Models.ClientModel import ClientModel
-from Models.MessageController import MessageController
-from Repositories.ClientRepository import ClientRepository
+from Backend.App.Models.ClientModel import ClientModel
+from Backend.App.Models.MessageController import MessageController
+from Backend.App.Repositories.ClientRepository import ClientRepository
 
 
 class ClientHandler:
