@@ -4,22 +4,41 @@ import sqlite3
 conn = sqlite3.connect('clients.db')
 cursor = conn.cursor()
 
-# Create a table
+# Create a table for clients
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS clients (
     id INTEGER PRIMARY KEY,
+    uuid TEXT NOT NULL UNIQUE,
     mac_address TEXT NOT NULL UNIQUE,
     nickname TEXT,
-    shutdown BOOLEAN NOT NULL,
-    installed_programs TEXT,
+    shutdown INTEGER NOT NULL, -- Use INTEGER for boolean values
     updatable_programs TEXT
 )
 ''')
 
-# Insert data
+# Create a table for installed programs
 cursor.execute('''
-INSERT INTO clients (mac_address, nickname, shutdown) VALUES (?, ?, ?)
-''', ('0x010000000000', 'testing PC', False))
+CREATE TABLE IF NOT EXISTS installed_programs (
+    id INTEGER PRIMARY KEY,
+    client_uuid TEXT NOT NULL,
+    program_id TEXT,
+    name TEXT NOT NULL,
+    version TEXT,
+    FOREIGN KEY(client_uuid) REFERENCES clients(uuid) -- Add foreign key constraint
+)
+''')
+
+# Insert data into installed_programs
+cursor.execute('''
+INSERT INTO installed_programs (client_uuid, program_id, name, version) 
+VALUES (?, ?, ?, ?)
+''', ('123e4567-e89b-12d3-a456-426614174000', 'program_test', 'Test Program', '1.0'))
+
+# Insert data into clients
+cursor.execute('''
+INSERT INTO clients (uuid, mac_address, nickname, shutdown) 
+VALUES (?, ?, ?, ?)
+''', ('123e4567-e89b-12d3-a456-426614174000', '0x010000000000', 'testing PC', 0))
 
 # Commit and close
 conn.commit()

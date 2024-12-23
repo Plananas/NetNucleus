@@ -11,7 +11,7 @@ class ClientRepository:
         client.save()
 
     @staticmethod
-    def get_client_by_mac_address(mac_address: str) -> Optional[ClientModel]:
+    def get_client_by_mac_address(mac_address: str) -> Optional[List[ClientModel]]:
         """Retrieve a client by MAC address."""
         return ClientModel.get(mac_address=mac_address)
 

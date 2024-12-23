@@ -19,7 +19,7 @@ def getUpdatableSoftware():
     # Skip the first two lines (headers and separators)
     for line in outputLines[2:]:
         # Split each line into parts based on 2 or more spaces
-        softwareDetails = re.split(r'\s{2,}', line.strip())
+        softwareDetails = re.split(r'\s{3,}', line.strip())
 
         # Ensure the line has at least 4 parts: Name, ID, Current Version, Available Version
         if len(softwareDetails) >= 4:

@@ -4,28 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Flask App{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.css') }}">
+    <style>
+        /* Optional: Add a subtle hover effect */
+        .nav-button:hover {
+            background-color: #007bff; /* Bootstrap Primary Color */
+            color: white !important;
+        }
+    </style>
 </head>
 <body>
-    <nav>
-       <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-        </div>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/clients">Clients</a></li>
-        </ul>
-        <footer>
-            <p>&copy; 2024 Flask App</p>
-        </footer>
-    </nav>
+    <div class="d-flex">
+        <!-- Vertical Navigation Bar -->
+        <nav class="nav flex-column bg-light p-3" style="min-width: 200px; height: 100vh;">
+            <a class="navbar-brand mb-4 text-center" href="/">
+                <h4>Flask App</h4>
+            </a>
+            <a class="btn btn-outline-primary nav-button mb-2" href="/">Home</a>
+            <a class="btn btn-outline-primary nav-button mb-2" href="/clients">Clients</a>
+            <a class="btn btn-outline-primary nav-button mb-2" href="/about">About</a>
+            <a class="btn btn-outline-primary nav-button mb-2" href="/contact">Contact</a>
+        </nav>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 
-
-
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap/bootstrap.js') }}"></script>
 </body>
 </html>

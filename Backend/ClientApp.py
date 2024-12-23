@@ -1,4 +1,5 @@
 import socket
+from getmac import get_mac_address
 import Backend.App.Client.SystemFunctions as SystemFunctions
 from Backend.App.Models.MessageController import MessageController
 import time
@@ -14,7 +15,16 @@ class Client:
         self.ADDR = (self.SERVER, self.PORT)
         self.message = MessageController(object)
         self.Connected = False
+
+        # Create the client socket
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Set larger buffer sizes
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)  # 64 KB for sending
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65536)
+
+
+        self.macAddress = get_mac_address()
 
     def run(self):
         try:
@@ -58,7 +68,7 @@ class Client:
             # empty strings caused my encryption to give out bad results so ive added this to the client
             print("please dont send empty strings... it breaks the server.")
         else:
-            write = self.message.write(msg)
+            write = self.message.write({self.macAddress: msg})
 
     def processMessage(self, message):
         print("\n[MESSAGE PROCESSING]")

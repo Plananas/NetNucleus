@@ -1,5 +1,4 @@
 import socket
-from getmac import get_mac_address
 import uuid
 
 class MessageController(object):
@@ -9,14 +8,9 @@ class MessageController(object):
     def __init__(self, connection):
         self.connection = connection
         self.messageId = str(uuid.uuid4())[:8]
-        self.macAddress = get_mac_address()
-
-    def getMacAddress(self):
-        return self.macAddress
 
     # Read the message sent from the client.
     def read(self):
-        messages = []
         messageLength = self.connection.recv(self.HEADER).decode(self.FORMAT).strip()
         try:
             messageLength = int(messageLength)
@@ -24,6 +18,8 @@ class MessageController(object):
             return "Invalid message length received"
         received_bytes = 0
         messageParts = []
+
+        print(messageLength)
 
         while received_bytes < messageLength:
             part = self.connection.recv(min(messageLength - received_bytes, 1024))
@@ -47,10 +43,9 @@ class MessageController(object):
     def write(self, message):
         fullMessage = f"{self.messageId}:{message}"
 
-        messageLength = len(fullMessage)
+        messageLength = len(fullMessage.encode(self.FORMAT))
         sendLength = str(messageLength).encode(self.FORMAT)
         sendLength += b' ' * (self.HEADER - len(sendLength))
-
         self.connection.send(sendLength)
         self.connection.send(fullMessage.encode(self.FORMAT))
 

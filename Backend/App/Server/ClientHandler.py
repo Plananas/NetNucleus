@@ -1,5 +1,9 @@
+import uuid
+import ast
+
 from Backend.App.Models.ClientModel import ClientModel
 from Backend.App.Models.MessageController import MessageController
+from Backend.App.Models.ProgramModel import ProgramModel
 from Backend.App.Repositories.ClientRepository import ClientRepository
 
 
@@ -40,15 +44,14 @@ class ClientHandler:
         """
         self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
 
-        responseArray = self.read()
-
+        responseArray = self.messageController.read()
+        print("RESPONSE ARRAY")
+        print(responseArray)
+        responseArray = ast.literal_eval(responseArray)
         for response in responseArray:
             print(response)
 
         return responseArray
-
-    def read(self):
-        return {self.messageController.getMacAddress(): self.messageController.read()}
 
     def initializeClientModel(self) -> ClientModel:
         macAndSoftware = self.getAllSoftware()
@@ -58,16 +61,29 @@ class ClientHandler:
         existingClient = clientRepository.get_client_by_mac_address(macAddress)
 
         if not existingClient:
+            client_uuid = str(uuid.uuid4())
             print('Client does not exist: Creating Model')
+
             self.clientModel: ClientModel = ClientModel(
+                    uuid = client_uuid,
                     mac_address = macAddress,
                     nickname = '',
                     shutdown = False,
-                    installed_programs = macAndSoftware[macAddress],
                     updatable_programs = ''
                 )
-
-            return self.clientModel.save()
+            self.clientModel.save()
+            self.initializePrograms(client_uuid ,macAndSoftware[macAddress])
+            return self.clientModel
 
         print('client exists')
-        return existingClient
+        return existingClient[0]
+
+    def initializePrograms(self, client_uuid, installed_software):
+        for program in installed_software:
+            programModel = ProgramModel(
+                client_uuid = client_uuid,
+                program_id = program["id"],
+                name = program["name"],
+                version = program["version"],
+            )
+            programModel.save()

@@ -1,5 +1,9 @@
 import sqlite3
 from typing import Any, Dict, List
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 # Abstract Model class
 class Model:
@@ -8,6 +12,9 @@ class Model:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    def get_id(self) -> int:
+        return self.id
 
     @classmethod
     def get_connection(cls):
@@ -38,11 +45,19 @@ class Model:
         }
         return type_mapping.get(py_type, "TEXT")
 
+    import logging
+
+    logging.basicConfig(level=logging.DEBUG)
+
     def save(self):
         """Save the current instance to the database, updating on conflict."""
         fields = list(self.__annotations__.keys())
         placeholders = ", ".join("?" for _ in fields)
         values = [self._serialize_value(getattr(self, field)) for field in fields]
+
+        logging.debug("Fields: %s", fields)
+        logging.debug("Placeholders: %s", placeholders)
+        logging.debug("Values: %s", values)
 
         # Prepare the ON CONFLICT clause if a unique field is specified
         if self.unique_field:
@@ -55,14 +70,21 @@ class Model:
         else:
             insert_sql = f"INSERT OR REPLACE INTO {self.table_name} ({', '.join(fields)}) VALUES ({placeholders})"
 
+        logging.debug("Generated SQL: %s", insert_sql)
+
         with self.get_connection() as conn:
-            conn.execute(insert_sql, values)
+            try:
+                conn.execute(insert_sql, values)
+                logging.debug("SQL executed successfully.")
+            except Exception as e:
+                logging.error("SQL execution failed: %s", e)
+                raise e
 
         return self
 
     @classmethod
-    def get(cls, **kwargs) -> "Model":
-        """Retrieve a model instance based on query parameters."""
+    def get(cls, **kwargs) -> list["Model"]:
+        """Retrieve multiple model instances based on query parameters."""
         conditions = " AND ".join(f"{key} = ?" for key in kwargs.keys())
         values = list(kwargs.values())
 
@@ -70,12 +92,12 @@ class Model:
 
         with cls.get_connection() as conn:
             cursor = conn.execute(select_sql, values)
-            row = cursor.fetchone()
-            if row:
+            rows = cursor.fetchall()
+            if rows:
                 field_names = [description[0] for description in cursor.description]
-                row_dict = dict(zip(field_names, row))
-                return cls(**cls._deserialize_row(row_dict))
-        return None
+                # Use the current class (cls) to ensure the subclass is used for instantiation
+                return [cls(**cls._deserialize_row(dict(zip(field_names, row)))) for row in rows]
+        return []
 
     @staticmethod
     def _serialize_value(value: Any) -> Any:

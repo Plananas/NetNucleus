@@ -19,6 +19,10 @@ class ServerProcess:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        # Set larger buffer sizes
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)  # 64 KB for sending
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65536)
+
     def run(self):
 
         self.server.bind(self.ADDR)
