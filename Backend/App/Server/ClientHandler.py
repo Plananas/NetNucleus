@@ -13,6 +13,7 @@ class ClientHandler:
     GET_UPGRADES_COMMAND = "upgrades"
     GET_ALL_SOFTWARE_COMMAND = "software"
     INSTALL_SOFTWARE_COMMAND = "install"
+    UNINSTALL_SOFTWARE_COMMAND = "uninstall"
 
     def __init__(self, client):
         self.messageController: MessageController = client
@@ -69,6 +70,21 @@ class ClientHandler:
 
         return responseArray
 
+    def uninstallSoftware(self, softwareName):
+        """
+        :return: Success Message
+        """
+        self.messageController.write((self.UNINSTALL_SOFTWARE_COMMAND + " " + softwareName))
+
+        responseArray = self.messageController.read()
+        print("RESPONSE ARRAY")
+        print(responseArray)
+        responseArray = ast.literal_eval(responseArray)
+        for response in responseArray:
+            print(response)
+
+        return responseArray
+
     def initializeClientModel(self) -> ClientModel:
         macAndSoftware = self.getAllSoftware()
         macAddress = next(iter(macAndSoftware))
@@ -99,7 +115,6 @@ class ClientHandler:
         for program in installed_software:
             programModel = ProgramModel(
                 client_uuid = client_uuid,
-                program_id = program["id"],
                 name = program["name"],
                 version = program["version"],
             )

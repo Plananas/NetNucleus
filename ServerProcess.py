@@ -139,6 +139,8 @@ class ServerProcess:
         if len(message) >= 2:
             if message[0].lower() == "install":
                 return client_handler.installSoftware(message[1])
+            elif message[0].lower() == "uninstall":
+                return client_handler.uninstallSoftware(message[1])
 
 
     @staticmethod

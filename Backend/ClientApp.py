@@ -52,7 +52,7 @@ class Client:
 
                 try:
                     print("[READING MESSAGE]", msg)
-                    self.send(self.processMessage(msg))
+                    self.send(self.process_message(msg))
                 except:
                     print("Error processing message")
             except:
@@ -70,19 +70,21 @@ class Client:
         else:
             write = self.message.write({self.macAddress: msg})
 
-    def processMessage(self, message):
+    def process_message(self, message):
         print("\n[MESSAGE PROCESSING]")
         if message.lower() == "shutdown":
             return SystemFunctions.shutdown()
         if message.lower() == "upgrades":
-            return SystemFunctions.getUpdatableSoftware()
+            return SystemFunctions.get_updatable_software()
         if message.lower() == "software":
-            return SystemFunctions.getAllSoftware()
+            return SystemFunctions.get_all_software()
 
         splitMessage = message.split()
         if len(splitMessage) == 2:
             if splitMessage[0].lower() == "install":
                 return SystemFunctions.install_program(splitMessage[1])
+            if splitMessage[0].lower() == "uninstall":
+                return SystemFunctions.uninstall_program(splitMessage[1])
 
 
 # let's run out client!!!!

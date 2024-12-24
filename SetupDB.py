@@ -21,7 +21,6 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS installed_programs (
     id INTEGER PRIMARY KEY,
     client_uuid TEXT NOT NULL,
-    program_id TEXT,
     name TEXT NOT NULL,
     version TEXT,
     FOREIGN KEY(client_uuid) REFERENCES clients(uuid) -- Add foreign key constraint
@@ -30,9 +29,9 @@ CREATE TABLE IF NOT EXISTS installed_programs (
 
 # Insert data into installed_programs
 cursor.execute('''
-INSERT INTO installed_programs (client_uuid, program_id, name, version) 
-VALUES (?, ?, ?, ?)
-''', ('123e4567-e89b-12d3-a456-426614174000', 'program_test', 'Test Program', '1.0'))
+INSERT INTO installed_programs (client_uuid, name, version) 
+VALUES (?, ?, ?)
+''', ('123e4567-e89b-12d3-a456-426614174000', 'Test Program', '1.0'))
 
 # Insert data into clients
 cursor.execute('''

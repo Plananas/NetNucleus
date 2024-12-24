@@ -5,7 +5,6 @@ class ProgramModel(Model):
     table_name = "installed_programs"
 
     client_uuid: str
-    program_id: str
     name: str
     version: str
 
@@ -17,7 +16,6 @@ class ProgramModel(Model):
         """
         return {
             "client_uuid": self.client_uuid,
-            "program_id": self.program_id,
             "name": self.name,
             "version": self.version
         }
