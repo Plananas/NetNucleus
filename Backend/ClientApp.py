@@ -79,6 +79,12 @@ class Client:
         if message.lower() == "software":
             return SystemFunctions.getAllSoftware()
 
+        splitMessage = message.split()
+        if len(splitMessage) == 2:
+            if splitMessage[0].lower() == "install":
+                return SystemFunctions.install_program(splitMessage[1])
+
+
 # let's run out client!!!!
 client = Client()
 client.run()

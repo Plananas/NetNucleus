@@ -12,6 +12,7 @@ class ClientHandler:
     SHUTDOWN_COMMAND = "shutdown"
     GET_UPGRADES_COMMAND = "upgrades"
     GET_ALL_SOFTWARE_COMMAND = "software"
+    INSTALL_SOFTWARE_COMMAND = "install"
 
     def __init__(self, client):
         self.messageController: MessageController = client
@@ -22,7 +23,7 @@ class ClientHandler:
         self.messageController.write(self.SHUTDOWN_COMMAND)
 
         #the client is shutting down so I think putting some kind of behaviour to check the status would be good
-        response = self.read()
+        response = self.messageController.read()
         return response
 
     def getUpdate(self):
@@ -31,7 +32,7 @@ class ClientHandler:
         """
         self.messageController.write(self.GET_UPGRADES_COMMAND)
 
-        responseArray = self.read()
+        responseArray = self.messageController.read()
 
         for response in responseArray:
             print(response)
@@ -43,6 +44,21 @@ class ClientHandler:
         :return: Array of Software
         """
         self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
+
+        responseArray = self.messageController.read()
+        print("RESPONSE ARRAY")
+        print(responseArray)
+        responseArray = ast.literal_eval(responseArray)
+        for response in responseArray:
+            print(response)
+
+        return responseArray
+
+    def installSoftware(self, softwareName):
+        """
+        :return: Success Message
+        """
+        self.messageController.write((self.INSTALL_SOFTWARE_COMMAND + " " + softwareName))
 
         responseArray = self.messageController.read()
         print("RESPONSE ARRAY")
@@ -76,6 +92,7 @@ class ClientHandler:
             return self.clientModel
 
         print('client exists')
+        existingClient[0].setShutdown(False)
         return existingClient[0]
 
     def initializePrograms(self, client_uuid, installed_software):
