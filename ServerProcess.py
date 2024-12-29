@@ -117,7 +117,9 @@ class ServerProcess:
         if client_handler:
             print(client.get_uuid())
             try:
-                print(self.process_messages(message, client_handler))
+                client = self.process_messages(message, client_handler)
+                print(client.get_uuid())
+                print("shutdown: ")
 
             except (socket.error, ConnectionResetError):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
@@ -131,16 +133,16 @@ class ServerProcess:
         if message[0].lower() == "shutdown":
             return client_handler.shutdown()
         elif message[0].lower() == "upgrades":
-            return client_handler.getUpdate()
+            return client_handler.get_available_updates()
         elif message[0].lower() == "software":
-            return client_handler.getAllSoftware()
+            return client_handler.get_client_with_software()
 
         #TODO messages with two inputs
         if len(message) >= 2:
             if message[0].lower() == "install":
                 return client_handler.installSoftware(message[1])
             elif message[0].lower() == "uninstall":
-                return client_handler.uninstallSoftware(message[1])
+                return client_handler.uninstall_software(message[1])
 
 
     @staticmethod

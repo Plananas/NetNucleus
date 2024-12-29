@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Abstract Model class
 class Model:
+    id: Optional[int] = None
     table_name: str = ""
 
     def __init__(self, **kwargs):
@@ -98,6 +99,19 @@ class Model:
                 # Use the current class (cls) to ensure the subclass is used for instantiation
                 return [cls(**cls._deserialize_row(dict(zip(field_names, row)))) for row in rows]
         return []
+
+    def delete(self) -> bool:
+        """
+        Delete the current instance from the database based on its unique identifier.
+        Returns True if the deletion was successful, False otherwise.
+        """
+        if not hasattr(self, "id") or self.id is None:
+            raise ValueError("The instance must have a valid 'id' to be deleted.")
+
+        delete_sql = f"DELETE FROM {self.table_name} WHERE id = ?"
+        with self.get_connection() as conn:
+            cursor = conn.execute(delete_sql, (self.id,))
+            return cursor.rowcount > 0  # True if rows were affected (deleted)
 
     @staticmethod
     def _serialize_value(value: Any) -> Any:

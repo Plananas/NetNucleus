@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from Backend.App.Models.Model import Model
 from Backend.App.Models.ProgramModel import ProgramModel
-from Backend.App.Repositories.InstalledProgramRepository import InstalledProgramRepository
+from Backend.App.Repositories.ProgramRepository import ProgramRepository
 
 
 class ClientModel(Model):
@@ -19,23 +19,23 @@ class ClientModel(Model):
     def get_uuid(self):
         return self.uuid
 
-    def getMacAddress(self) -> str:
+    def get_mac_address(self) -> str:
         return self.mac_address
-    def setMacAddress(self, mac_address: str) -> None:
+    def set_mac_address(self, mac_address: str) -> None:
         self.mac_address = mac_address
 
-    def getNickname(self) -> Optional[str]:
+    def get_nickname(self) -> Optional[str]:
         return self.nickname
-    def setNickname(self, nickname: str) -> None:
+    def set_nickname(self, nickname: str) -> None:
         self.nickname = nickname
 
-    def getShutdown(self) -> bool:
+    def get_shutdown(self) -> bool:
         return self.shutdown
-    def setShutdown(self, shutdown: bool) -> None:
+    def set_shutdown(self, shutdown: bool) -> None:
         self.shutdown = shutdown
 
     def get_installed_programs(self) -> Optional[List[ProgramModel]]:
-        program_repository = InstalledProgramRepository()
+        program_repository = ProgramRepository()
         installed_programs = program_repository.get_program_by_client_id(self.uuid)
 
         return installed_programs

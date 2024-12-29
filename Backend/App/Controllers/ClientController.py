@@ -6,7 +6,7 @@ from flask import Flask, jsonify, request
 from flask import Blueprint, render_template
 
 from Backend.App.Repositories.ClientRepository import ClientRepository
-from Backend.App.Repositories.InstalledProgramRepository import InstalledProgramRepository
+from Backend.App.Repositories.ProgramRepository import ProgramRepository
 from Backend.App.Server.ClientHandler import ClientHandler
 
 
@@ -74,7 +74,7 @@ class ClientController:
     def get_client_by_mac_page(mac_address):
         """Endpoint to return a single client by name."""
         client_repository = ClientRepository()
-        program_repository = InstalledProgramRepository()
+        program_repository = ProgramRepository()
 
         # Attempt to retrieve the client by nickname
         client = client_repository.get_client_by_mac_address(mac_address)[0]

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from Backend.App.Models.Model import Model
 
 
@@ -6,7 +8,8 @@ class ProgramModel(Model):
 
     client_uuid: str
     name: str
-    version: str
+    current_version: str
+    available_version: Optional[str]
 
     unique_field = ""
 
@@ -17,5 +20,6 @@ class ProgramModel(Model):
         return {
             "client_uuid": self.client_uuid,
             "name": self.name,
-            "version": self.version
+            "current_version": self.current_version,
+            "available_version": self.available_version
         }

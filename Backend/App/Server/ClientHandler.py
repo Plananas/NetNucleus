@@ -5,6 +5,7 @@ from Backend.App.Models.ClientModel import ClientModel
 from Backend.App.Models.MessageController import MessageController
 from Backend.App.Models.ProgramModel import ProgramModel
 from Backend.App.Repositories.ClientRepository import ClientRepository
+from Backend.App.Repositories.ProgramRepository import ProgramRepository
 
 
 class ClientHandler:
@@ -15,10 +16,14 @@ class ClientHandler:
     INSTALL_SOFTWARE_COMMAND = "install"
     UNINSTALL_SOFTWARE_COMMAND = "uninstall"
 
-    def __init__(self, client):
-        self.messageController: MessageController = client
+    SUCCESSFUL_UNINSTALL_MESSAGE = "Successfully uninstalled"
+    SUCCESSFUL_INSTALL_MESSAGE = "Successfully installed"
+
+    def __init__(self, message_controller):
+        self.messageController: MessageController = message_controller
         self.connectedStatus = False
-        self.clientModel = self.initializeClientModel()
+        self.clientModel = self.get_client_with_software()
+        self.get_available_updates()
 
     def shutdown(self):
         self.messageController.write(self.SHUTDOWN_COMMAND)
@@ -27,20 +32,24 @@ class ClientHandler:
         response = self.messageController.read()
         return response
 
-    def getUpdate(self):
+    def get_available_updates(self):
         """
         :return: Array of Software available to update
         """
         self.messageController.write(self.GET_UPGRADES_COMMAND)
 
         responseArray = self.messageController.read()
+        responseArray = ast.literal_eval(responseArray)
 
-        for response in responseArray:
-            print(response)
+        mac, programs = next(iter(responseArray.items()))
+        for program in programs:
+            print(program)
+            self.save_program(self.clientModel.get_uuid() ,program)
 
         return responseArray
 
-    def getAllSoftware(self):
+
+    def get_client_with_software(self) -> ClientModel :
         """
         :return: Array of Software
         """
@@ -50,72 +59,110 @@ class ClientHandler:
         print("RESPONSE ARRAY")
         print(responseArray)
         responseArray = ast.literal_eval(responseArray)
-        for response in responseArray:
-            print(response)
+        client = self.save_client(responseArray)
 
-        return responseArray
+        return client
 
-    def installSoftware(self, softwareName):
+
+    def installSoftware(self, software_name):
         """
         :return: Success Message
         """
-        self.messageController.write((self.INSTALL_SOFTWARE_COMMAND + " " + softwareName))
+        self.messageController.write((self.INSTALL_SOFTWARE_COMMAND + " " + software_name))
 
         responseArray = self.messageController.read()
-        print("RESPONSE ARRAY")
-        print(responseArray)
-        responseArray = ast.literal_eval(responseArray)
-        for response in responseArray:
-            print(response)
+        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+        mac_address = self.clientModel.get_mac_address()
+
+        response = responseArray[mac_address]
+        print(response)
+
+        # Check if "Successful" is in the response
+        if self.SUCCESSFUL_INSTALL_MESSAGE in response:
+            print("Uninstallation was successful.")
+            self.get_client_with_software()
+        else:
+            print("Uninstallation failed or status unknown.")
 
         return responseArray
 
-    def uninstallSoftware(self, softwareName):
+    def uninstall_software(self, software_name):
         """
         :return: Success Message
         """
-        self.messageController.write((self.UNINSTALL_SOFTWARE_COMMAND + " " + softwareName))
+        self.messageController.write((self.UNINSTALL_SOFTWARE_COMMAND + " " + software_name))
 
         responseArray = self.messageController.read()
-        print("RESPONSE ARRAY")
-        print(responseArray)
-        responseArray = ast.literal_eval(responseArray)
-        for response in responseArray:
-            print(response)
+        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+        mac_address = self.clientModel.get_mac_address()
+
+        response = responseArray[mac_address]
+        print(response)
+
+        # Check if "Successful" is in the response
+        if self.SUCCESSFUL_UNINSTALL_MESSAGE in response:
+            print("Uninstallation was successful.")
+            self.get_client_with_software()
+        else:
+            print("Uninstallation failed or status unknown.")
 
         return responseArray
 
-    def initializeClientModel(self) -> ClientModel:
-        macAndSoftware = self.getAllSoftware()
-        macAddress = next(iter(macAndSoftware))
 
-        clientRepository = ClientRepository()
-        existingClient = clientRepository.get_client_by_mac_address(macAddress)
+    def save_client(self, mac_and_software) -> ClientModel:
+        mac_address = next(iter(mac_and_software))
+        client_repository = ClientRepository()
+        existing_client = client_repository.get_client_by_mac_address(mac_address)
 
-        if not existingClient:
+        if existing_client:
+            client_uuid = existing_client[0].get_uuid()  # Assuming the existing client has a 'uuid' field
+            print('Client exists')
+            existing_client[0].set_shutdown(False)
+        else:
             client_uuid = str(uuid.uuid4())
             print('Client does not exist: Creating Model')
 
             self.clientModel: ClientModel = ClientModel(
-                    uuid = client_uuid,
-                    mac_address = macAddress,
-                    nickname = '',
-                    shutdown = False,
-                    updatable_programs = ''
-                )
-            self.clientModel.save()
-            self.initializePrograms(client_uuid ,macAndSoftware[macAddress])
-            return self.clientModel
-
-        print('client exists')
-        existingClient[0].setShutdown(False)
-        return existingClient[0]
-
-    def initializePrograms(self, client_uuid, installed_software):
-        for program in installed_software:
-            programModel = ProgramModel(
-                client_uuid = client_uuid,
-                name = program["name"],
-                version = program["version"],
+                uuid=client_uuid,
+                mac_address=mac_address,
+                nickname='',
+                shutdown=False,
+                updatable_programs=''
             )
-            programModel.save()
+            self.clientModel.save()
+            existing_client = [self.clientModel]
+
+        # Save the associated program
+        self.save_programs(client_uuid, mac_and_software[mac_address])
+
+        return existing_client[0]
+
+    def save_programs(self, client_uuid, installed_software):
+        #TODO delete existing software and replace with the current ones
+        program_repository = ProgramRepository()
+        existing_program = program_repository.get_program_by_client_id(client_uuid)
+        if existing_program:
+            for program in existing_program:
+            #The program should already exist if it had a version so we delete it
+                program.delete()
+
+        for program in installed_software:
+            self.save_program(client_uuid, program)
+
+    def save_program(self, client_uuid, program):
+        program_repository = ProgramRepository()
+        print(program)
+        existing_program = program_repository.get_program_by_client_id_and_name(client_uuid, program["name"])
+
+        if existing_program:
+            #The program should already exist if it had a version so we delete it
+            existing_program[0].delete()
+
+        programModel = ProgramModel(
+            client_uuid=client_uuid,
+            name=program["name"],
+            current_version=program["current_version"],
+            available_version = program.get("available_version") or None
+        )
+
+        programModel.save()

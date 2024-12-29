@@ -20,11 +20,9 @@
                     <tr>
                         <th>#</th>
                         <th>Name</th>
-                        <th>Version</th>
+                        <th>Current Version</th>
                         <th>Latest Version</th>
                         <th></th>
-
-
                     </tr>
                 </thead>
                 <tbody>
@@ -33,8 +31,8 @@
                             <tr>
                                 <td>{{ loop.index }}</td>
                                 <td>{{ installedProgram.name or "N/A" }}</td>
-                                <td>{{ installedProgram.version or "N/A" }}</td>
-                                <td></td>
+                                <td>{{ installedProgram.current_version or "N/A" }}</td>
+                                <td>{{ installedProgram.available_version or "N/A" }}</td>
                                 <td></td>
                             </tr>
                         {% endfor %}

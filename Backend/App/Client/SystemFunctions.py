@@ -4,45 +4,60 @@ import re
 import json
 
 def shutdown():
-    #os.system('shutdown -s')
+    #os.system('shutdown -s')#
+    #TODO set shutdown status
     return "Shutting Down"
 
-#TODO change the methods in this function to all use chocolatey
 def get_updatable_software():
     print("Getting Updatable Software...")
 
-    # Run the choco upgrade command to get the list of outdated packages
-    result = subprocess.run(['choco', 'upgrade', '--all', '--output', 'json'], capture_output=True, text=True)
+    # Run the choco outdated command to get the list of outdated packages
+    result = subprocess.run(['choco', 'outdated', '--all'], capture_output=True, text=True)
 
     # Initialize an empty list to store software update details
-    updatableSoftware = []
+    updatable_software = []
 
     # Check if the command was successful
     if result.returncode != 0:
         print(f"Error: {result.stderr}")
-        return updatableSoftware
+        return updatable_software
 
-    # The output is expected to be in JSON format
+    # Parse the output assuming it is a pipe-separated list
     try:
-        # Parse the output as JSON
-        output = json.loads(result.stdout)
+        # Split the output into lines
+        lines = result.stdout.splitlines()
+        # Iterate over each line to parse package details
+        for line in lines:
+            # Skip header lines or invalid data
+            if not line.strip() or '|' not in line:
+                continue
 
-        for software in output:
-            # Only include software that is actually upgradable
-            if 'package' in software and 'versions' in software:
-                softwareEntry = {
-                    'name': software['package'],
-                    'id': software['package'],
-                    'current_version': software['versions']['installed'],
-                    'available_version': software['versions']['available']
-                }
-                updatableSoftware.append(softwareEntry)
-    except json.JSONDecodeError:
-        print("Failed to decode the JSON output from Chocolatey.")
+            # Split the line by the pipe separator
+            parts = line.split('|')
 
-    return updatableSoftware
+            # Ensure there are enough parts to parse
+            if len(parts) < 4:
+                continue
 
-#TODO test
+            # Extract package details
+            name = parts[0].strip()
+            current_version = parts[1].strip()
+            available_version = parts[2].strip()
+
+            # Append the parsed data to the updatable_software list
+            updatable_software.append({
+                'name': name,
+                'current_version': current_version,
+                'available_version': available_version
+            })
+    except Exception as e:
+        print(f"Failed to parse the output: {e}")
+
+    updatable_software.pop(0)
+    print(updatable_software)
+    return updatable_software
+
+
 def get_all_software():
     print("Getting all installed software...")
     try:
@@ -76,48 +91,38 @@ def get_all_software():
             name, version = softwareDetails
             softwareEntry = {
                 'name': name,
-                'version': version,
+                'current_version': version,
             }
             installedSoftware.append(softwareEntry)
 
+    installedSoftware.pop(0)
+    print(installedSoftware)
     return installedSoftware
 
 
-#TODO change to chocolatey
 def install_program(program_name):
     try:
-        # Run the winget command to install the program
-        subprocess.run(['winget', 'install', program_name], check=True)
+        # Run the Chocolatey command to install the program
+        subprocess.run(['choco', 'install', program_name, '-y', '--force'], check=True)
         return f"Successfully installed {program_name}"
     except subprocess.CalledProcessError:
         return f"Failed to install {program_name}"
     except FileNotFoundError:
-        return "winget is not installed or available on this system."
+        return "Chocolatey is not installed or available on this system."
 
-#TODO change to chocolatey
+
 def uninstall_program(program_name):
     try:
-        # List installed instances of the program
-        result = subprocess.run(
-            ['choco', 'uninstall' , '--id', program_name],
-            capture_output=True, text=True, check=True
+        # Run the Chocolatey command to uninstall the program with automatic 'Yes' input
+        process = subprocess.run(
+            ['choco', 'uninstall', program_name, '-y'],
+            input='y\n',  # Automatically answers 'Yes' to prompts
+            text=True,
+            check=True
         )
-        output = result.stdout
-
-        # Extract IDs from the output using fixed-width parsing
-        lines = output.splitlines()
-        ids = []
-
-        if not ids:
-            return f"No instances of {program_name} found to uninstall."
-
-        # Uninstall each instance by ID
-        for program_id in ids:
-            subprocess.run(['winget', 'uninstall', '--id', program_id, '--silent'], check=True)
-
-        return f"Successfully uninstalled all instances of {program_name}."
-
+        return f"Successfully uninstalled {program_name}."
     except subprocess.CalledProcessError as e:
         return f"Failed to uninstall {program_name}. Error: {e}"
     except FileNotFoundError:
-        return "winget is not installed or available on this system."
+        return "Chocolatey is not installed or available on this system."
+

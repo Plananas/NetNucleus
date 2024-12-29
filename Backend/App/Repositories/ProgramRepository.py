@@ -3,7 +3,7 @@ from typing import List, Optional
 from Backend.App.Models.ProgramModel import ProgramModel
 
 
-class InstalledProgramRepository:
+class ProgramRepository:
     """Repository class for managing ProgramModel interactions with the database."""
 
     @staticmethod
@@ -17,3 +17,10 @@ class InstalledProgramRepository:
         print(client_uuid)
 
         return ProgramModel.get(client_uuid=client_uuid)
+
+
+    @staticmethod
+    def get_program_by_client_id_and_name(client_uuid: str, name: str,) -> List[ProgramModel]:
+        """Retrieve a program by client id."""
+
+        return ProgramModel.get(client_uuid=client_uuid, name=name)
