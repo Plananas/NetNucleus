@@ -3,10 +3,121 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<style>
+/* Hover effect for the card */
+.card.hover-button:hover {
+    transform: scale(1.03); /* Slightly enlarge the card */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Add a hover shadow */
+    transition: transform 0.2s, box-shadow 0.2s; /* Smooth animation */
+    cursor: pointer; /* Show pointer on hover */
+}
+.card.hover-button {
+    width: 100%; /* Make the button fill the full width */
+}
 
+</style>
 
-    <h2>Home Page!</h2>
-    <p>This is a simple example of Flask with a basic frontend.</p>
+<div class="jumbotron bg-light text-dark">
+    <h1 class="display-4">Dashboard</h1>
+    <br>
+</div>
+<br>
+<div class="container mt-2">
+    <div class="row">
+        <!-- First card -->
+        <div class="col-md-3">
+            <div class="card shadow mb-1">
+                <div class="card-body">
+                    <h5 class="card-title">Devices Connected</h5>
+                    <p class="card-text" style="font-size: 70px">{{ online_client_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Second card -->
+        <div class="col-md-9">
+            <div class="card shadow mb-1">
+                <div class="card-body">
+                    <h5 class="card-title">Devices</h5>
+                    <!-- Left-aligned table -->
+                    <div class="text-start">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Device Name</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for client in clients %}
+                                <tr>
+                                    <td>{{ client.nickname or client.mac_address }}</td>
+                                    {% if client.shutdown %}
+                                        <td>🔴 Offline</td>
+                                    {% else %}
+                                        <td>🟢 Online</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="container mt-2">
+    <div class="row">
+        <div class="col-md-3">
+            <button type="button" class="card shadow mb-1 hover-button border-0" id="shutdown-button">
+                <div class="card-body">
+                    <h5 class="card-title">Shutdown</h5>
+                </div>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="card shadow mb-1 hover-button border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Scan for Updates</h5>
+                </div>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="card shadow mb-1 hover-button border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Update all Software</h5>
+                </div>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="card shadow mb-1 hover-button border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Install</h5>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to handle the button click and send a request to the backend
+    document.getElementById('shutdown-button').addEventListener('click', function() {
+        fetch('/api/clients/shutdown', {
+            method: 'POST',  // HTTP method
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            })
+        })
+        .then(response => response.json())  // Parse JSON response
+        .then(data => {
+            console.log(data);  // Handle response data
+        })
+        .catch(error => console.error('Error:', error));  // Handle any errors
+    });
+</script>
 
 {% endblock %}
+

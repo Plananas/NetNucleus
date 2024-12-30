@@ -29,7 +29,7 @@ class ClientModel(Model):
     def set_nickname(self, nickname: str) -> None:
         self.nickname = nickname
 
-    def get_shutdown(self) -> bool:
+    def is_shutdown(self) -> bool:
         return self.shutdown
     def set_shutdown(self, shutdown: bool) -> None:
         self.shutdown = shutdown

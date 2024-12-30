@@ -1,5 +1,5 @@
 import socket
-from typing import List
+from typing import List, Optional
 import re
 import threading
 import time
@@ -7,8 +7,6 @@ import time
 from Backend.App.Models.MessageController import MessageController
 from Backend.App.Repositories.ClientRepository import ClientRepository
 from Backend.App.Server.ClientHandler import ClientHandler
-from flask import Flask
-from Backend.App.Controllers.ClientController import ClientController
 
 
 class ServerProcess:
@@ -22,29 +20,22 @@ class ServerProcess:
         self.client_handlers: List[ClientHandler] = []
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.client_controller = ClientController()
         self.lock = threading.Lock()
 
 
     def run(self):
-
         self.server.bind(self.ADDR)
         self.server.listen()
-        print(f"server is listening on {self.SERVER}\n")
-        threading.Thread(target=self.terminal_process, daemon=True).start()
-        threading.Thread(target=self.search_for_clients, daemon=True).start()
-
-        #TODO set existing clients to shutdown
+        # Clients haven't connected yet, so I am setting them all to be shutdown
         client_repository = ClientRepository()
         clients = client_repository.get_all_clients()
         for client in clients:
             client.set_shutdown(True)
             client.save()
 
-        app = Flask(__name__, static_folder='Frontend/static', template_folder='frontend/templates')
-        blueprint = self.client_controller.getBlueprint()
-        app.register_blueprint(blueprint)
-        app.run(debug=True)
+        print(f"server is listening on {self.SERVER}\n")
+        threading.Thread(target=self.terminal_process, daemon=True).start()
+        threading.Thread(target=self.search_for_clients, daemon=True).start()
 
 
     def search_for_clients(self):
@@ -56,7 +47,6 @@ class ServerProcess:
             with self.lock:
                 self.client_handlers.append(clientHandler)
                 self.active_connections += 1
-                self.client_controller.updateClientHandlers(clientHandler)
             print(f"Users Connected: {self.active_connections}")
 
 
@@ -84,16 +74,36 @@ class ServerProcess:
             print("\n[INFO] Interrupted by user. Exiting.")
 
 
-    def broadcast(self, message):
+    def enter_command(self, message) -> str:
+        try:
+            time.sleep(0.5)
+            # Check if the message contains exactly two words
+            splitMessage = message.split()
+            if len(splitMessage) >= 2 and self.is_valid_uuid(splitMessage[-1]):
+                self.send_to_client(splitMessage, splitMessage[-1])
+            else:
+                # Add a slight delay to let the server process
+                time.sleep(1)
+
+                # Send the message to each client in the list
+                return self.broadcast(splitMessage)
+
+        except KeyboardInterrupt:
+            print("\n[INFO] Interrupted by user. Exiting.")
+
+
+    def broadcast(self, message) -> Optional[str]:
         """
         Broadcast to every connected client
         :param message:
         :return:
         """
-
+        print(message)
         for index, client_handler in enumerate(self.client_handlers):
             try:
-                print(self.process_messages(message, client_handler))
+                result = self.process_messages(message, client_handler)
+                print(result)
+                return result
 
             except (socket.error, ConnectionResetError):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
@@ -101,9 +111,10 @@ class ServerProcess:
                 client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
                 self.active_connections -= 1
+                return None
 
 
-    def send_to_client(self, message, uuid):
+    def send_to_client(self, message, uuid) -> Optional[str]:
         """
         Send to a Specific Client
         :param uuid:
@@ -125,8 +136,8 @@ class ServerProcess:
         if client_handler:
             print(client.get_uuid())
             try:
-                client = self.process_messages(message, client_handler)
-                print(client.get_uuid())
+                result = self.process_messages(message, client_handler)
+                return result
 
             except (socket.error, ConnectionResetError):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
@@ -134,6 +145,7 @@ class ServerProcess:
                 client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
                 self.active_connections -= 1
+                return None
 
 
     def process_messages(self, message, client_handler):

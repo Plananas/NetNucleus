@@ -8,6 +8,7 @@ from flask import Blueprint, render_template
 from Backend.App.Repositories.ClientRepository import ClientRepository
 from Backend.App.Repositories.ProgramRepository import ProgramRepository
 from Backend.App.Server.ClientHandler import ClientHandler
+from ServerProcess import ServerProcess
 
 
 class ClientController:
@@ -20,7 +21,6 @@ class ClientController:
     )
 
     def __init__(self):
-        self.clientHandlers: List[ClientHandler] = []
         # Bind the instance method to the route
         self.main.add_url_rule(
             '/api/clients/shutdown',
@@ -29,20 +29,25 @@ class ClientController:
             methods=['POST']
         )
         self.lock = threading.Lock()
+        self.server = ServerProcess()
 
     def getBlueprint(self):
         return self.main
-
-    def updateClientHandlers(self, clientHandlers: ClientHandler):
-        print('ADDING CLIENT HANDLERS')
-        self.clientHandlers.append(clientHandlers)
-
 
     @staticmethod
     @main.route('/')
     def home():
         """Render the home page."""
-        return render_template('home.html')
+        client_repository = ClientRepository()
+        clients = client_repository.get_all_clients()
+        clients_as_dict = [client.to_dict() for client in clients]
+        online_client_count = 0
+
+        for client in clients:
+            if not client.is_shutdown():
+                online_client_count += 1
+
+        return render_template('home.html', clients=clients_as_dict, online_client_count=online_client_count)
 
 
     @staticmethod
@@ -106,20 +111,7 @@ class ClientController:
 
     def shutdown_client(self):
         print("SHUTDOWN ENDPOINT TRIGGERED")
-        data = request.get_json()
-        if 'mac_address' not in data:
-            return jsonify({"error": "No MAC address provided."}), 400
 
-        mac_address = data['mac_address']
-        client_repository = ClientRepository()
-
-        client = client_repository.get_client_by_mac_address(mac_address)
-        if not client:
-            return jsonify({"error": f"No client found with mac address: '{mac_address}'"}), 404
-
-        client = client[0]  # Assuming the repository returns a list
-
-        for index, clientHandler in enumerate(self.clientHandlers):
-            print(clientHandler)
+        self.server.enter_command('shutdown')
 
         return jsonify({"message": "", "active_connections": "active_connections"}), 200
