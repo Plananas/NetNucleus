@@ -15,9 +15,12 @@ class ClientHandler:
     GET_ALL_SOFTWARE_COMMAND = "software"
     INSTALL_SOFTWARE_COMMAND = "install"
     UNINSTALL_SOFTWARE_COMMAND = "uninstall"
+    UPGRADE_SOFTWARE_COMMAND = "upgrade"
 
+    SUCCESSFUL_SHUTDOWN_MESSAGE = "Shutting down"
     SUCCESSFUL_UNINSTALL_MESSAGE = "Successfully uninstalled"
     SUCCESSFUL_INSTALL_MESSAGE = "Successfully installed"
+    SUCCESSFUL_UPGRADE_MESSAGE = "Successfully upgraded"
 
     def __init__(self, message_controller):
         self.messageController: MessageController = message_controller
@@ -30,7 +33,20 @@ class ClientHandler:
 
         #the client is shutting down so I think putting some kind of behaviour to check the status would be good
         response = self.messageController.read()
+
+        # Check if "Successful" is in the response
+        if self.SUCCESSFUL_SHUTDOWN_MESSAGE in response:
+            print("Shutdown was successful.")
+            self.set_shutdown()
+
+        else:
+            print("Shutdown was not successful.")
+
         return response
+
+    def set_shutdown(self):
+        self.clientModel.set_shutdown(True)
+        self.clientModel.save()
 
     def get_available_updates(self):
         """
@@ -64,7 +80,7 @@ class ClientHandler:
         return client
 
 
-    def installSoftware(self, software_name):
+    def install_software(self, software_name):
         """
         :return: Success Message
         """
@@ -75,14 +91,13 @@ class ClientHandler:
         mac_address = self.clientModel.get_mac_address()
 
         response = responseArray[mac_address]
-        print(response)
 
         # Check if "Successful" is in the response
         if self.SUCCESSFUL_INSTALL_MESSAGE in response:
-            print("Uninstallation was successful.")
             self.get_client_with_software()
-        else:
-            print("Uninstallation failed or status unknown.")
+            self.get_available_updates()
+
+        print(response)
 
         return responseArray
 
@@ -97,15 +112,56 @@ class ClientHandler:
         mac_address = self.clientModel.get_mac_address()
 
         response = responseArray[mac_address]
-        print(response)
 
         # Check if "Successful" is in the response
         if self.SUCCESSFUL_UNINSTALL_MESSAGE in response:
-            print("Uninstallation was successful.")
             self.get_client_with_software()
-        else:
-            print("Uninstallation failed or status unknown.")
+            self.get_available_updates()
 
+        print(response)
+
+        return responseArray
+
+
+    def upgrade_software(self, software_name):
+        """
+        :return: Success Message
+        """
+        self.messageController.write((self.UPGRADE_SOFTWARE_COMMAND + " " + software_name))
+
+        responseArray = self.messageController.read()
+        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+        mac_address = self.clientModel.get_mac_address()
+
+        response = responseArray[mac_address]
+
+        # Check if "Successful" is in the response
+        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
+            self.get_client_with_software()
+            self.get_available_updates()
+
+        print(response)
+        return responseArray
+
+
+    def upgrade_all_software(self):
+        """
+        :return: Success Message
+        """
+        self.messageController.write(self.UPGRADE_SOFTWARE_COMMAND)
+
+        responseArray = self.messageController.read()
+        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+        mac_address = self.clientModel.get_mac_address()
+
+        response = responseArray[mac_address]
+
+        # Check if "Successful" is in the response
+        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
+            self.get_client_with_software()
+            self.get_available_updates()
+
+        print(response)
         return responseArray
 
 
@@ -138,7 +194,6 @@ class ClientHandler:
         return existing_client[0]
 
     def save_programs(self, client_uuid, installed_software):
-        #TODO delete existing software and replace with the current ones
         program_repository = ProgramRepository()
         existing_program = program_repository.get_program_by_client_id(client_uuid)
         if existing_program:
@@ -151,7 +206,6 @@ class ClientHandler:
 
     def save_program(self, client_uuid, program):
         program_repository = ProgramRepository()
-        print(program)
         existing_program = program_repository.get_program_by_client_id_and_name(client_uuid, program["name"])
 
         if existing_program:

@@ -91,6 +91,7 @@ class ServerProcess:
             except (socket.error, ConnectionResetError):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
                 client_handler.messageController.connection.close()
+                client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
                 self.active_connections -= 1
 
@@ -119,30 +120,38 @@ class ServerProcess:
             try:
                 client = self.process_messages(message, client_handler)
                 print(client.get_uuid())
-                print("shutdown: ")
 
             except (socket.error, ConnectionResetError):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
                 client_handler.messageController.connection.close()
+                client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
                 self.active_connections -= 1
 
 
     def process_messages(self, message, client_handler):
         print("\n[MESSAGE PROCESSING]")
-        if message[0].lower() == "shutdown":
-            return client_handler.shutdown()
-        elif message[0].lower() == "upgrades":
-            return client_handler.get_available_updates()
-        elif message[0].lower() == "software":
-            return client_handler.get_client_with_software()
+        if message:
+            if message[0].lower() == "shutdown":
+                return client_handler.shutdown()
+            elif message[0].lower() == "upgrades":
+                return client_handler.get_available_updates()
+            elif message[0].lower() == "software":
+                return client_handler.get_client_with_software()
+            elif message[0].lower() == "upgrade":
+                return client_handler.upgrade_all_software()
+            elif message[0].lower() == "terminated":
+                return client_handler.terminate()
 
-        #TODO messages with two inputs
-        if len(message) >= 2:
-            if message[0].lower() == "install":
-                return client_handler.installSoftware(message[1])
-            elif message[0].lower() == "uninstall":
-                return client_handler.uninstall_software(message[1])
+            if len(message) >= 2:
+                if message[0].lower() == "install":
+                    return client_handler.install_software(message[1])
+                elif message[0].lower() == "uninstall":
+                    return client_handler.uninstall_software(message[1])
+                elif message[0].lower() == "upgrade":
+                    return client_handler.upgrade_software(message[1])
+        else:
+            print("enter a valid message")
 
 
     @staticmethod

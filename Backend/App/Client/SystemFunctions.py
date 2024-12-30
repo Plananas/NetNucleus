@@ -100,6 +100,27 @@ def get_all_software():
     return installedSoftware
 
 
+def update_software(program_name):
+    try:
+        # Run the Chocolatey command to install the program
+        subprocess.run(['choco', 'upgrade', program_name, '-y', '--force'], check=True)
+        return f"Successfully upgraded {program_name}"
+    except subprocess.CalledProcessError:
+        return f"Failed to upgrade {program_name}"
+    except FileNotFoundError:
+        return "Chocolatey is not installed or available on this system."
+
+def update_all_software():
+    try:
+        # Run the Chocolatey command to install the program
+        subprocess.run(['choco', 'upgrade', 'all', '-y', '--force'], check=True)
+        return f"Successfully upgraded all software"
+    except subprocess.CalledProcessError:
+        return f"Failed to upgrade"
+    except FileNotFoundError:
+        return "Chocolatey is not installed or available on this system."
+
+
 def install_program(program_name):
     try:
         # Run the Chocolatey command to install the program

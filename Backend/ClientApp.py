@@ -1,8 +1,10 @@
 import socket
+import atexit
+import time
+
 from getmac import get_mac_address
 import Backend.App.Client.SystemFunctions as SystemFunctions
 from Backend.App.Models.MessageController import MessageController
-import time
 
 class Client:
     def __init__(self):
@@ -78,6 +80,8 @@ class Client:
             return SystemFunctions.get_updatable_software()
         if message.lower() == "software":
             return SystemFunctions.get_all_software()
+        if message.lower() == "upgrade":
+            return SystemFunctions.update_all_software()
 
         splitMessage = message.split()
         if len(splitMessage) == 2:
@@ -85,8 +89,16 @@ class Client:
                 return SystemFunctions.install_program(splitMessage[1])
             if splitMessage[0].lower() == "uninstall":
                 return SystemFunctions.uninstall_program(splitMessage[1])
+            if splitMessage[0].lower() == "upgrade":
+                return SystemFunctions.update_software(splitMessage[1])
 
+
+    def cleanup(self):
+        # Send termination message
+        print("[CLEANUP] Sending termination message")
+        self.client.close()
 
 # let's run out client!!!!
 client = Client()
 client.run()
+atexit.register(client.cleanup)
