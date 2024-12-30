@@ -34,6 +34,13 @@ class ServerProcess:
         threading.Thread(target=self.terminal_process, daemon=True).start()
         threading.Thread(target=self.search_for_clients, daemon=True).start()
 
+        #TODO set existing clients to shutdown
+        client_repository = ClientRepository()
+        clients = client_repository.get_all_clients()
+        for client in clients:
+            client.set_shutdown(True)
+            client.save()
+
         app = Flask(__name__, static_folder='Frontend/static', template_folder='frontend/templates')
         blueprint = self.client_controller.getBlueprint()
         app.register_blueprint(blueprint)

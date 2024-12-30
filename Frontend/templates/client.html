@@ -7,6 +7,11 @@
     <div class="col-md-2">
         <h2>{{ client.nickname or client.mac_address }}</h2>
     </div>
+    {% if client.shutdown %}
+        <p class="card-text">🔴</p>
+    {% else %}
+        <p class="card-text">🟢</p>
+    {% endif %}
     <div class="col-md-4">
         <a class="btn btn-outline-primary nav-button mb-2" id="shutdown-button">Shutdown</a>
     </div>
@@ -33,7 +38,11 @@
                                 <td>{{ installedProgram.name or "N/A" }}</td>
                                 <td>{{ installedProgram.current_version or "N/A" }}</td>
                                 <td>{{ installedProgram.available_version or "N/A" }}</td>
-                                <td></td>
+                                <td>
+                                    {% if installedProgram.available_version %}
+                                        <a class="btn btn-outline-primary mb-1" id="installation-button">Upgrade</a>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     {% else %}

@@ -174,6 +174,7 @@ class ClientHandler:
             client_uuid = existing_client[0].get_uuid()  # Assuming the existing client has a 'uuid' field
             print('Client exists')
             existing_client[0].set_shutdown(False)
+            existing_client[0].save()
         else:
             client_uuid = str(uuid.uuid4())
             print('Client does not exist: Creating Model')
