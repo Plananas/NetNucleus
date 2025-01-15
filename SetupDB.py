@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS installed_programs (
 )
 ''')
 
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL
+    )
+''')
+
 # Insert data into installed_programs
 cursor.execute('''
 INSERT INTO installed_programs (client_uuid, name, current_version) 

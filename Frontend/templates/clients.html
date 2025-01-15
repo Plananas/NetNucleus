@@ -4,13 +4,18 @@
 
 {% block content %}
 
-    <h2 class="my-4 text-center">Clients List</h2>
     <div class="container">
+        <div class="row">
+            <div class="jumbotron text-dark">
+                <h1 class="display-4 text">Clients</h1>
+                <br>
+                <br>
+            </div>
+        </div>
         <div class="row">
             {% for client in clients %}
                 <div class="col-md-4 col-sm-6 mb-4">
-                    <a href="/clients/{{ client.mac_address }}" class="card text-decoration-none shadow-sm">
-                        <img style="width: 50px; height: 50px" src="{{ url_for('static', filename='images/computer-icon.png') }}" class="card-img-top" alt="Client Image">
+                    <a href="/clients/{{ client.mac_address }}" class="card card-client hover-button bg-off-white shadow-sm">
                         <div class="card-body text-center">
                             <p class="card-text">{{ client.nickname or client.mac_address }}</p>
 

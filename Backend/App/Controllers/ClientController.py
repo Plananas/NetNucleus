@@ -2,7 +2,7 @@ import socket
 import threading
 from typing import List
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect, url_for
 from flask import Blueprint, render_template
 
 from Backend.App.Repositories.ClientRepository import ClientRepository
@@ -20,19 +20,69 @@ class ClientController:
             template_folder="frontend/templates"
     )
 
-    def __init__(self):
+
+    def __init__(self, server):
         # Bind the instance method to the route
         self.main.add_url_rule(
             '/api/clients/shutdown',
             'shutdown_client',
             self.shutdown_client,
-            methods=['POST']
-        )
+            methods=['POST'])
+        self.main.add_url_rule(
+            '/api/clients/upgrades',
+            'scan_for_upgrades',
+            self.scan_for_upgrades,
+            methods=['POST'])
+        self.main.add_url_rule(
+            '/api/clients/upgrade',
+            'get_upgrade',
+            self.get_upgrades,
+            methods=['POST'])
+        self.main.add_url_rule(
+            '/api/clients/install',
+            'install_software',
+            self.install_software,
+            methods=['POST'])
+        self.main.add_url_rule(
+            '/do_login',
+            'do_login',
+            self.do_login,
+            methods=['POST'])
+
         self.lock = threading.Lock()
-        self.server = ServerProcess()
+        self.server = server
+        print(self.server.id)
+
 
     def getBlueprint(self):
         return self.main
+
+
+    @staticmethod
+    @main.before_request
+    def check_login():
+        # Skip the login check for login, do_login, and static endpoints
+        if request.endpoint not in ['main.login', 'main.do_login', 'static'] and 'login' not in request.cookies:
+            return redirect(url_for('main.login'))
+
+
+    @staticmethod
+    @main.route('/login')
+    def login():
+        return render_template('login.html')
+
+
+    def do_login(self):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        # Example authentication logic
+        if self.server.confirm_user(self.server, username, password):  # Replace with real logic
+            resp = redirect(url_for('main.home'))
+            resp.set_cookie('login', 'true', max_age=3600)  # Login cookie valid for 1 hour
+            return resp
+        else:
+            return redirect(url_for('main.login'))
+
 
     @staticmethod
     @main.route('/')
@@ -42,6 +92,9 @@ class ClientController:
         clients = client_repository.get_all_clients()
         clients_as_dict = [client.to_dict() for client in clients]
         online_client_count = 0
+
+        #TODO get the common software
+
 
         for client in clients:
             if not client.is_shutdown():
@@ -109,9 +162,37 @@ class ClientController:
         # Convert the client to a dictionary
         return jsonify(client.to_dict()), 200
 
+
     def shutdown_client(self):
-        print("SHUTDOWN ENDPOINT TRIGGERED")
+        data = request.get_json()
+        command = 'shutdown'
 
-        self.server.enter_command('shutdown')
+        if data.get('mac'):
+            command += " " + str(data.get('mac'))
 
-        return jsonify({"message": "", "active_connections": "active_connections"}), 200
+        response = self.server.enter_command('shutdown')
+        return jsonify({"message": response}), 200
+
+
+    def scan_for_upgrades(self):
+        response = self.server.enter_command('upgrades')
+
+        return jsonify({"message": response}), 200
+
+
+    def get_upgrades(self):
+
+        response = self.server.enter_command('upgrade')
+
+        return jsonify({"message": response}), 200
+
+
+    def install_software(self):
+        data = request.get_json()
+        command = "install " + str(data.get('software'))
+
+        if data.get('mac'):
+            command += " " + str(data.get('mac'))
+
+        response = self.server.enter_command(command)
+        return jsonify({"message": response}), 200

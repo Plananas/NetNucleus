@@ -3,8 +3,8 @@ import atexit
 import time
 
 from getmac import get_mac_address
-import Backend.App.Client.SystemFunctions as SystemFunctions
-from Backend.App.Models.MessageController import MessageController
+import SystemFunctions as SystemFunctions
+from MessageController import MessageController
 
 class Client:
     def __init__(self):
@@ -12,7 +12,7 @@ class Client:
         self.PORT = 50000
         #print("Input the address of the server")
         #self.SERVER = input("> ")
-       # self.SERVER = "10.130.94.3"
+        #self.SERVER = "10.130.94.3"
         self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.message = MessageController(object)

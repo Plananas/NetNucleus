@@ -1,3 +1,4 @@
+import random
 import socket
 from typing import List, Optional
 import re
@@ -6,6 +7,7 @@ import time
 
 from Backend.App.Models.MessageController import MessageController
 from Backend.App.Repositories.ClientRepository import ClientRepository
+from Backend.App.Repositories.UserRepository import UserRepository
 from Backend.App.Server.ClientHandler import ClientHandler
 
 
@@ -13,6 +15,9 @@ class ServerProcess:
     PORT = 50000
 
     def __init__(self):
+        #just to check
+        self.id =  random.randint(1,1000)
+        print("serverprocess is created", self.id)
         self.client_controller = None
         self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
@@ -28,7 +33,8 @@ class ServerProcess:
         self.server.listen()
         # Clients haven't connected yet, so I am setting them all to be shutdown
         client_repository = ClientRepository()
-        clients = client_repository.get_all_clients()
+        clients = client_repository.get_all_clients()#
+        print("running", self.id)
         for client in clients:
             client.set_shutdown(True)
             client.save()
@@ -62,6 +68,14 @@ class ServerProcess:
 
                 # Check if the message contains exactly two words
                 splitMessage = message.split()
+
+                if splitMessage[0].lower() == "createuser":
+                    try:
+                        username_password = splitMessage[1].split(":")
+                        print(self.generate_user(self, username_password[0], username_password[1]))
+                    except:
+                        print("Could not create user")
+
                 if len(splitMessage) >= 2 and self.is_valid_uuid(splitMessage[-1]):
                     self.send_to_client(splitMessage, splitMessage[-1])
                 else:
@@ -148,7 +162,7 @@ class ServerProcess:
                 return None
 
 
-    def process_messages(self, message, client_handler):
+    def process_messages(self, message, client_handler) -> str:
         print("\n[MESSAGE PROCESSING]")
         if message:
             if message[0].lower() == "shutdown":
@@ -159,8 +173,6 @@ class ServerProcess:
                 return client_handler.get_client_with_software()
             elif message[0].lower() == "upgrade":
                 return client_handler.upgrade_all_software()
-            elif message[0].lower() == "terminated":
-                return client_handler.terminate()
 
             if len(message) >= 2:
                 if message[0].lower() == "install":
@@ -178,3 +190,16 @@ class ServerProcess:
         # Regular expression for matching UUID format
         uuid_pattern = r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
         return bool(re.match(uuid_pattern, uuid_str))
+
+    @staticmethod
+    def generate_user(self, username, password):
+        userRepository = UserRepository()
+        if userRepository.create_user(username, password):
+            return "User Generated Successfully."
+        else:
+            return "User Generated Failed."
+
+    @staticmethod
+    def confirm_user(self, username, password) -> bool:
+        userRepository = UserRepository()
+        return userRepository.confirm_user(username, password)

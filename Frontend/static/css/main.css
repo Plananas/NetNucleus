@@ -1,0 +1,168 @@
+/* main.css */
+
+.clients-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Center align the client boxes */
+    padding: 20px;
+}
+
+.client-box {
+    display: flex; /* Arrange image and content side by side */
+    align-items: center; /* Align image and text vertically */
+    background-color: #f4f4f4; /* Light background for the box */
+    border: 1px solid #ccc; /* Border around the box */
+    border-radius: 10px; /* Rounded corners */
+    width: 200px; /* Set a fixed width for each box */
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for the box */
+}
+
+.client-image {
+    width: 50px; /* Set the image size */
+    height: 50px; /* Set the image size */
+    margin-right: 15px; /* Add spacing between the image and text */
+}
+
+.client-info p {
+    font-size: 14px;
+    font-weight: bolder;
+    color: #333;
+    margin: 0; /* Remove default paragraph margin */
+}
+
+/*-----------------Background Colours--------------------*/
+.bg-off-white {
+    background-color: #ECECE3;
+}
+.bg-dark-off-white {
+    background-color: #F5EDE0;
+}
+.bg-dark-blue {
+    background-color: #18252F;
+}
+.bg-orange {
+    background-color: #CA5213;
+}
+/*-----------------Font Colours--------------------*/
+.text-off-white {
+    color: #ECECE3;
+}
+.text-dark-off-white {
+    color: #F5EDE0;
+}
+.text-dark-blue {
+    color: #18252F;
+}
+.text-orange {
+    color: #CA5213;
+}
+/*-----------------Card Buttons--------------------*/
+.card.hover-button:hover {
+    transform: scale(1.03); /* Slightly enlarge the card */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Add a hover shadow */
+    transition: transform 0.2s, box-shadow 0.2s; /* Smooth animation */
+    cursor: pointer; /* Show pointer on hover */
+}
+.card.hover-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.card-nav-body h5 {
+    margin: 0;
+    line-height: 1px; /* Ensures the icon has minimal extra vertical space */
+}
+
+.card-nav-body {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    height: 100%; /* Fill the card body to match card dimensions */
+}
+.card-nav.hover-button {
+    width: 80px;
+    height: 80px;
+    margin: 30px auto;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 3px;
+}
+.card-nav.hover-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+a.card-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+.card-client {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+.disabled-button {
+    background-color: #e0e0e0 !important; /* Grey background */
+    color: #a0a0a0 !important; /* Grey text */
+    cursor: not-allowed; /* Change cursor to indicate it's disabled */
+}
+
+/*-------------------------------------*/
+
+.table-borderless > :not(caption) > * > * {
+    background-color: #ECECE3;
+}
+
+.card-button {
+    display: inline-block; /* Ensures buttons respect width and height */
+    height: 110px; /* Set a specific height */
+    width: 140px; /* Set a specific width */
+    margin: 10px; /* Adds spacing around each button */
+    padding: 10px; /* Adds space inside the button */
+    box-sizing: border-box; /* Ensures padding doesn't affect the size */
+    text-align: center; /* Centers text inside the button */
+    vertical-align: top; /* Aligns buttons to the top */
+}
+
+.btn-primary {
+  --bs-btn-color: #ECECE3; /* Off-white for text */
+  --bs-btn-bg: #CA5213; /* Orange for background */
+  --bs-btn-border-color: #CA5213; /* Orange for border */
+  --bs-btn-hover-color: #ECECE3; /* Off-white for hover text */
+  --bs-btn-hover-bg: #A64210; /* Darker orange for hover background */
+  --bs-btn-hover-border-color: #A64210; /* Darker orange for hover border */
+  --bs-btn-focus-shadow-rgb: 202, 82, 19; /* Orange focus shadow */
+  --bs-btn-active-color: #ECECE3; /* Off-white for active text */
+  --bs-btn-active-bg: #7A310C; /* Even darker orange for active background */
+  --bs-btn-active-border-color: #7A310C; /* Even darker orange for active border */
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); /* Subtle shadow for active state */
+  --bs-btn-disabled-color: #ECECE3; /* Off-white for disabled text */
+  --bs-btn-disabled-bg: #F5EDE0; /* Dark off-white for disabled background */
+  --bs-btn-disabled-border-color: #F5EDE0; /* Dark off-white for disabled border */
+}
+
+/* Table Headers */
+.table-bordered thead th {
+    color: #ECECE3; /* Off-white for text */
+    background-color: #18252F; /* Dark blue background */
+    font-weight: bold; /* Make headers bold */
+}
+
+/* Table Body */
+.table-bordered tbody tr {
+    background-color: #ECECE3; /* Light off-white background */
+    color: #18252F; /* Dark blue text */
+    border-top: 1px solid #CA5213; /* Orange border between rows */
+}
+
+.table-bordered tbody tr:hover {
+    background-color: #F5EDE0; /* Slightly darker off-white on hover */
+}

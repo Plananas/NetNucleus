@@ -3,44 +3,87 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<style>
-/* Hover effect for the card */
-.card.hover-button:hover {
-    transform: scale(1.03); /* Slightly enlarge the card */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Add a hover shadow */
-    transition: transform 0.2s, box-shadow 0.2s; /* Smooth animation */
-    cursor: pointer; /* Show pointer on hover */
-}
-.card.hover-button {
-    width: 100%; /* Make the button fill the full width */
-}
 
-</style>
-
-<div class="jumbotron bg-light text-dark">
-    <h1 class="display-4">Dashboard</h1>
-    <br>
-</div>
-<br>
 <div class="container mt-2">
     <div class="row">
+        <div class="jumbotron text-dark">
+            <h1 class="display-4">Dashboard</h1>
+            <br>
+            <br>
+        </div>
+    </div>
+    <div class="row">
         <!-- First card -->
-        <div class="col-md-3">
-            <div class="card shadow mb-1">
-                <div class="card-body">
-                    <h5 class="card-title">Devices Connected</h5>
-                    <p class="card-text" style="font-size: 70px">{{ online_client_count }}</p>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="card shadow mb-1 bg-off-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Devices Connected</h5>
+                        <p class="card-text" style="font-size: 70px">{{ online_client_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card bg-off-white shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">Install Software</h5>
+                            <form id="install-software-form">
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="software-name"
+                                        placeholder="Enter software name"
+                                        required>
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="install-button">
+                                        Install
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" title="Shutdown" class="card card-button shadow mb-1 hover-button border-0 bg-off-white" id="shutdown-button">
+                        <div class="card-body">
+                            <h5 class="card-title zmdi zmdi-power" style="font-size: 65px"></h5>
+                            <br>
+                        </div>
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="card card-button shadow mb-1 hover-button border-0 bg-off-white" id="upgrades-button">
+                        <div class="card-body">
+                            <h5 class="card-title">Scan for Updates</h5>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="card card-button shadow mb-1 hover-button border-0 bg-off-white" id="upgrade-button">
+                        <div class="card-body">
+                            <h5 class="card-title">Update Software</h5>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
         <!-- Second card -->
-        <div class="col-md-9">
-            <div class="card shadow mb-1">
+        <div class="col-md-8">
+            <div class="card bg-off-white shadow">
                 <div class="card-body">
                     <h5 class="card-title">Devices</h5>
                     <!-- Left-aligned table -->
                     <div class="text-start">
-                        <table class="table table-borderless">
+                        <table class="table table-borderless ">
                             <thead>
                                 <tr>
                                     <th scope="col">Device Name</th>
@@ -67,39 +110,6 @@
     </div>
 </div>
 
-<div class="container mt-2">
-    <div class="row">
-        <div class="col-md-3">
-            <button type="button" class="card shadow mb-1 hover-button border-0" id="shutdown-button">
-                <div class="card-body">
-                    <h5 class="card-title">Shutdown</h5>
-                </div>
-            </button>
-        </div>
-        <div class="col-md-3">
-            <button type="button" class="card shadow mb-1 hover-button border-0">
-                <div class="card-body">
-                    <h5 class="card-title">Scan for Updates</h5>
-                </div>
-            </button>
-        </div>
-        <div class="col-md-3">
-            <button type="button" class="card shadow mb-1 hover-button border-0">
-                <div class="card-body">
-                    <h5 class="card-title">Update all Software</h5>
-                </div>
-            </button>
-        </div>
-        <div class="col-md-3">
-            <button type="button" class="card shadow mb-1 hover-button border-0">
-                <div class="card-body">
-                    <h5 class="card-title">Install</h5>
-                </div>
-            </button>
-        </div>
-    </div>
-</div>
-
 <script>
     // JavaScript to handle the button click and send a request to the backend
     document.getElementById('shutdown-button').addEventListener('click', function() {
@@ -116,6 +126,68 @@
             console.log(data);  // Handle response data
         })
         .catch(error => console.error('Error:', error));  // Handle any errors
+    });
+
+    document.getElementById('upgrades-button').addEventListener('click', function () {
+        fetch('/api/clients/upgrades', {
+            method: 'POST',  // HTTP method
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+            .then(response => response.json())  // Parse JSON response
+            .then(data => {
+                console.log(data);  // Handle response data
+            })
+            .catch(error => console.error('Error:', error));  // Handle any errors
+    });
+    document.getElementById('upgrade-button').addEventListener('click', function() {
+        fetch('/api/clients/upgrade', {
+            method: 'POST',  // HTTP method
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            })
+        })
+        .then(response => response.json())  // Parse JSON response
+        .then(data => {
+            console.log(data);  // Handle response data
+        })
+        .catch(error => console.error('Error:', error));  // Handle any errors
+    });
+    document.getElementById('install-button').addEventListener('click', function () {
+        const softwareName = document.getElementById('software-name').value;
+
+        if (!softwareName) {
+            alert('Please enter a software name.');
+            return;
+        }
+
+        fetch('/api/clients/install', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'software': softwareName
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(`Software installation initiated: ${softwareName}`);
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to install software. Please try again.');
+            });
     });
 </script>
 
