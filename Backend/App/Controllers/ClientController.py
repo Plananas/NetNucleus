@@ -1,8 +1,9 @@
 import socket
 import threading
+import secrets
 from typing import List
 
-from flask import Flask, jsonify, request, redirect, url_for
+from flask import Flask, jsonify, request, redirect, url_for, g
 from flask import Blueprint, render_template
 
 from Backend.App.Repositories.ClientRepository import ClientRepository
@@ -14,10 +15,10 @@ from ServerProcess import ServerProcess
 class ClientController:
 
     main = Blueprint(
-            "main",
-            __name__,
-            static_folder="Frontend/static",
-            template_folder="frontend/templates"
+        "main",
+        __name__,
+        static_folder="Frontend/static",
+        template_folder="frontend/templates"
     )
 
 
@@ -52,6 +53,16 @@ class ClientController:
         self.lock = threading.Lock()
         self.server = server
         print(self.server.id)
+        self.session_store = {}
+
+        @self.main.before_request
+        def check_login():
+            print("check_login")
+            if request.endpoint not in ['main.login', 'main.do_login', 'static']:
+                login_token = request.cookies.get('login')
+                if not login_token or login_token not in self.session_store:
+                    return redirect(url_for('main.login'))
+                g.user = self.session_store[login_token]
 
 
     def getBlueprint(self):
@@ -59,29 +70,26 @@ class ClientController:
 
 
     @staticmethod
-    @main.before_request
-    def check_login():
-        # Skip the login check for login, do_login, and static endpoints
-        if request.endpoint not in ['main.login', 'main.do_login', 'static'] and 'login' not in request.cookies:
-            return redirect(url_for('main.login'))
-
-
-    @staticmethod
     @main.route('/login')
     def login():
-        return render_template('login.html')
+        login_failed = request.args.get('login_failed', 'false') == 'true'
+        return render_template('login.html', login_failed=login_failed)
 
 
     def do_login(self):
         username = request.form.get('username')
         password = request.form.get('password')
+
         # Example authentication logic
         if self.server.confirm_user(self.server, username, password):  # Replace with real logic
-            resp = redirect(url_for('main.home'))
-            resp.set_cookie('login', 'true', max_age=3600)  # Login cookie valid for 1 hour
-            return resp
+            unique_token = secrets.token_hex(16)  # Generate a secure random token
+            self.session_store[unique_token] = username  # Save the token associated with the user
+
+            response = redirect(url_for('main.home'))
+            response.set_cookie('login', unique_token, max_age=3600, httponly=True, secure=True)  # Secure cookie settings
+            return response
         else:
-            return redirect(url_for('main.login'))
+            return redirect(url_for('main.login', login_failed='true'))
 
 
     @staticmethod

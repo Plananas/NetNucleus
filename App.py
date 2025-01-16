@@ -21,7 +21,7 @@ if __name__ == '__main__':
     blueprint = client_controller.getBlueprint()
     app.register_blueprint(blueprint)
     #THIS WILL MAKE HTE APP NOT WORK IF TRUE
-    app.run(debug=False)
+    app.run(debug=True)
 
 
 

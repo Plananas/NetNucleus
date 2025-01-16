@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon/favicon.ico') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
@@ -38,6 +39,15 @@
             text-align: center;
             color: #18252F;
         }
+        .alert {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+        }
         .form-control {
             background-color: #F5EDE0; /* Dark off-white */
             border: 1px solid #CA5213; /* Orange border */
@@ -71,6 +81,13 @@
     </div>
     <div class="login-container">
         <h1>Login</h1>
+
+        {% if login_failed %}
+        <div class="alert">
+            Invalid username or password.
+        </div>
+        {% endif %}
+
         <form action="/do_login" method="POST">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
