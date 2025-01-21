@@ -5,10 +5,10 @@ import re
 import threading
 import time
 
-from Backend.App.Models.MessageController import MessageController
-from Backend.App.Repositories.ClientRepository import ClientRepository
-from Backend.App.Repositories.UserRepository import UserRepository
-from Backend.App.Server.ClientHandler import ClientHandler
+from ServerApplication.Backend.App.Models.MessageController import MessageController
+from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
+from ServerApplication.Backend.App.Repositories.UserRepository import UserRepository
+from ServerApplication.Backend.App.Server.ClientHandler import ClientHandler
 
 
 class ServerProcess:

@@ -1,7 +1,7 @@
 import sqlite3
 
 # Connect to the database (creates a file-based database)
-conn = sqlite3.connect('clients.db')
+conn = sqlite3.connect('../clients.db')
 cursor = conn.cursor()
 
 # Create a table for clients

@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from Backend.App.Models.Model import Model
-from Backend.App.Models.ProgramModel import ProgramModel
-from Backend.App.Repositories.ProgramRepository import ProgramRepository
+from ServerApplication.Backend.App.Models.Model import Model
+from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
+from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
 
 
 class ClientModel(Model):

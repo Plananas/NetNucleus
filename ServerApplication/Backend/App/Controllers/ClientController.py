@@ -1,15 +1,11 @@
-import socket
 import threading
 import secrets
-from typing import List
 
-from flask import Flask, jsonify, request, redirect, url_for, g
+from flask import jsonify, request, redirect, url_for, g
 from flask import Blueprint, render_template
 
-from Backend.App.Repositories.ClientRepository import ClientRepository
-from Backend.App.Repositories.ProgramRepository import ProgramRepository
-from Backend.App.Server.ClientHandler import ClientHandler
-from ServerProcess import ServerProcess
+from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
+from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
 
 
 class ClientController:
@@ -102,7 +98,6 @@ class ClientController:
         online_client_count = 0
 
         #TODO get the common software
-
 
         for client in clients:
             if not client.is_shutdown():

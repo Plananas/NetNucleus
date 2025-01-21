@@ -1,6 +1,6 @@
 from typing import Optional
 
-from Backend.App.Models.Model import Model
+from ServerApplication.Backend.App.Models.Model import Model
 
 
 class ProgramModel(Model):

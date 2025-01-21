@@ -1,19 +1,22 @@
+import os
+import json
 import socket
-import atexit
 import time
-
 from getmac import get_mac_address
-import SystemFunctions as SystemFunctions
+import SystemFunctions
 from MessageController import MessageController
+import servicemanager
+
 
 class Client:
+    CONFIG_DIR = os.path.join(os.environ["ProgramData"], "NetworkAutomationClient")
+    CONFIG_FILE = os.path.join(CONFIG_DIR, "client.config")  # Full path to the config file
+    SERVICE_NAME = "NetworkAutomationClient"
     def __init__(self):
-        # all the client's attributes
+        #check choco is installed or the app won't work
+        SystemFunctions.ensure_chocolatey_installed()
         self.PORT = 50000
-        #print("Input the address of the server")
-        #self.SERVER = input("> ")
-        #self.SERVER = "10.130.94.3"
-        self.SERVER = socket.gethostbyname(socket.gethostname())
+        self.SERVER = self.get_server_ip()
         self.ADDR = (self.SERVER, self.PORT)
         self.message = MessageController(object)
         self.Connected = False
@@ -25,52 +28,65 @@ class Client:
         self.client.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)  # 64 KB for sending
         self.client.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65536)
 
-
         self.macAddress = get_mac_address()
 
-    def run(self):
+
+    def get_server_ip(self):
+        """Retrieve the server IP from a config file or prompt the user via a UI."""
         try:
-            self.client.connect(self.ADDR)
-        except:
-            print("[CONNECTION ERROR]Could not connect to host.\nEither the host isn't up or your not connected to the network.")
+            with open(self.CONFIG_FILE, "r") as f:
+                for line in f:
+                    if line.startswith("IP_ADDRESS="):
+                        return line.strip().split("=")[1]
+        except FileNotFoundError:
+            print("Configuration file not found.")
+            return None
+
+    def run(self, servicemanager):
+        while True:
+            try:
+                print(f"Attempting to connect to {self.ADDR}...")
+                self.client.connect(self.ADDR)
+                print("[CONNECTION SUCCESS] Connected to host.")
+                break  # Exit the loop if connection is successful
+            except Exception as e:
+                print(f"[CONNECTION ERROR] Could not connect to host: {e}")
+                print("Retrying in 30 seconds...")
+                time.sleep(30)
 
         try:
-            #Message handler will deal with the sending of all messages.
             self.message = MessageController(self.client)
             self.Connected = True
-
-        except:
-            print("Error creating the message Handler")
+            print("[MESSAGE CONTROLLER] Successfully created.")
+        except Exception as e:
+            print(f"[MESSAGE CONTROLLER ERROR] Error creating the message handler: {e}")
             self.Connected = False
 
-        self.handleServer()
+        servicemanager.LogInfoMsg(f"{self.SERVICE_NAME}: Service is now running.")
+        self.handle_server()
 
-    def handleServer(self):
+    def handle_server(self):
         print("\n[LISTENING FOR MESSAGES]")
-        # Constantly listening to the server for messages.
         while self.Connected:
             try:
                 msg = self.message.read()
-
-                try:
+                if msg:
                     print("[READING MESSAGE]", msg)
                     self.send(self.process_message(msg))
-                except:
-                    print("Error processing message")
-            except:
-                print("\n[CONNECTION ERROR] Disconnecting")
-                self.connected = False
+            except socket.timeout:
+                # Timeout occurred, check if still running
+                continue
+            except Exception as e:
+                print(f"\n[CONNECTION ERROR] {e}. Disconnecting.")
+                self.Connected = False
                 break
-            print(f"{msg}")
 
-    # this will send our message into the message handler
     def send(self, msg):
         time.sleep(0.5)
         if msg == "":
-            # empty strings caused my encryption to give out bad results so ive added this to the client
-            print("please dont send empty strings... it breaks the server.")
+            print("Please don't send empty strings. It breaks the server.")
         else:
-            write = self.message.write({self.macAddress: msg})
+            self.message.write({self.macAddress: msg})
 
     def process_message(self, message):
         print("\n[MESSAGE PROCESSING]")
@@ -83,22 +99,20 @@ class Client:
         if message.lower() == "upgrade":
             return SystemFunctions.update_all_software()
 
-        splitMessage = message.split()
-        if len(splitMessage) == 2:
-            if splitMessage[0].lower() == "install":
-                return SystemFunctions.install_program(splitMessage[1])
-            if splitMessage[0].lower() == "uninstall":
-                return SystemFunctions.uninstall_program(splitMessage[1])
-            if splitMessage[0].lower() == "upgrade":
-                return SystemFunctions.update_software(splitMessage[1])
-
+        split_message = message.split()
+        if len(split_message) == 2:
+            if split_message[0].lower() == "install":
+                return SystemFunctions.install_program(split_message[1])
+            if split_message[0].lower() == "uninstall":
+                return SystemFunctions.uninstall_program(split_message[1])
+            if split_message[0].lower() == "upgrade":
+                return SystemFunctions.update_software(split_message[1])
 
     def cleanup(self):
-        # Send termination message
         print("[CLEANUP] Sending termination message")
         self.client.close()
 
-# let's run out client!!!!
-client = Client()
-client.run()
-atexit.register(client.cleanup)
+
+if __name__ == "__main__":
+    client = Client()
+    client.run()

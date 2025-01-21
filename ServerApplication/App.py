@@ -1,10 +1,9 @@
 import threading
 
-from flask import Flask, request, redirect, url_for
+from flask import Flask
 
-from Backend.App.Controllers.ClientController import ClientController
-from ServerProcess import ServerProcess
-
+from ServerApplication.Backend.App.Controllers.ClientController import ClientController
+from ServerApplication.ServerProcess import ServerProcess
 
 global server
 
@@ -21,7 +20,7 @@ if __name__ == '__main__':
     blueprint = client_controller.getBlueprint()
     app.register_blueprint(blueprint)
     #THIS WILL MAKE HTE APP NOT WORK IF TRUE
-    app.run(debug=True)
+    app.run(debug=False)
 
 
 

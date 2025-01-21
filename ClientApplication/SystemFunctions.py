@@ -1,7 +1,10 @@
 import os
 import subprocess
 import re
-import json
+import winshell
+import win32com.client
+import sys
+
 
 def shutdown():
     #os.system('shutdown -s')#
@@ -146,4 +149,52 @@ def uninstall_program(program_name):
         return f"Failed to uninstall {program_name}. Error: {e}"
     except FileNotFoundError:
         return "Chocolatey is not installed or available on this system."
+
+
+def ensure_chocolatey_installed():
+    """
+    Checks if Chocolatey (choco) is installed on the system. If it is not installed,
+    installs it using a PowerShell script.
+    """
+
+    # Step 1: Check if choco is installed
+    try:
+        # "choco --version" will throw FileNotFoundError if `choco` is not on PATH
+        # or CalledProcessError if there's another execution problem
+        subprocess.run(["choco", "--version"], check=True, capture_output=True)
+        print("Chocolatey is already installed.")
+        return
+    except FileNotFoundError:
+        print("Chocolatey not found.")
+    except subprocess.CalledProcessError:
+        # We got a return code != 0; this may mean Chocolatey is not properly installed
+        # or something else went wrong
+        print("Chocolatey detected but could not run. Attempting to reinstall.")
+
+    # Step 2: Install Chocolatey using PowerShell
+    # Using the official Chocolatey installation script from https://community.chocolatey.org/install.ps1
+    print("Installing Chocolatey. This may take a few moments...")
+    install_cmd = (
+        r"Set-ExecutionPolicy Bypass -Scope Process -Force; "
+        r"[System.Net.ServicePointManager]::SecurityProtocol = "
+        r"[System.Net.ServicePointManager]::SecurityProtocol -bor 3072; "
+        r"iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+    )
+    try:
+        subprocess.run(
+            ["powershell", "-Command", install_cmd],
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        print("Installation of Chocolatey failed with an error:")
+        print(e)
+        return
+
+    # Step 3: Verify installation
+    try:
+        subprocess.run(["choco", "--version"], check=True, capture_output=True)
+        print("Chocolatey installation successful.")
+    except Exception as e:
+        print("Chocolatey installation was attempted but verification failed.")
+        print(e)
 

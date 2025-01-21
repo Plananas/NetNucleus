@@ -1,11 +1,11 @@
 import uuid
 import ast
 
-from Backend.App.Models.ClientModel import ClientModel
-from Backend.App.Models.MessageController import MessageController
-from Backend.App.Models.ProgramModel import ProgramModel
-from Backend.App.Repositories.ClientRepository import ClientRepository
-from Backend.App.Repositories.ProgramRepository import ProgramRepository
+from ServerApplication.Backend.App.Models.ClientModel import ClientModel
+from ServerApplication.Backend.App.Models.MessageController import MessageController
+from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
+from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
+from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
 
 
 class ClientHandler:
