@@ -21,5 +21,7 @@ event viewer
 These commands get the service running as a python script:
 python .\NetworkAutomationService.py install
 python .\NetworkAutomationService.py start
+python .\NetworkAutomationService.py stop
+python .\NetworkAutomationService.py remove
 
 

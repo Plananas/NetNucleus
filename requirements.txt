@@ -3,3 +3,4 @@ getmac
 pywin32
 winshell
 pyinstaller
+pycryptodome

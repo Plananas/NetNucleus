@@ -2,7 +2,7 @@ import uuid
 import ast
 
 from ServerApplication.Backend.App.Models.ClientModel import ClientModel
-from ServerApplication.Backend.App.Models.MessageController import MessageController
+from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
 from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
 from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
 from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
@@ -23,7 +23,7 @@ class ClientHandler:
     SUCCESSFUL_UPGRADE_MESSAGE = "Successfully upgraded"
 
     def __init__(self, message_controller):
-        self.messageController: MessageController = message_controller
+        self.messageController: MessageHandler = message_controller
         self.connectedStatus = False
         self.clientModel = self.get_client_with_software()
         self.get_available_updates()
@@ -32,7 +32,11 @@ class ClientHandler:
         self.messageController.write(self.SHUTDOWN_COMMAND)
 
         #the client is shutting down so I think putting some kind of behaviour to check the status would be good
+
         response = self.messageController.read()
+        if not response:
+            print("[ERROR] No response received for shutdown command.")
+            return None
 
         # Check if "Successful" is in the response
         if self.SUCCESSFUL_SHUTDOWN_MESSAGE in response:
@@ -91,6 +95,10 @@ class ClientHandler:
         mac_address = self.clientModel.get_mac_address()
 
         response = responseArray[mac_address]
+
+        if not response:
+            print("[ERROR] No response received for install command.")
+            return None
 
         # Check if "Successful" is in the response
         if self.SUCCESSFUL_INSTALL_MESSAGE in response:

@@ -5,7 +5,7 @@ import re
 import threading
 import time
 
-from ServerApplication.Backend.App.Models.MessageController import MessageController
+from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
 from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
 from ServerApplication.Backend.App.Repositories.UserRepository import UserRepository
 from ServerApplication.Backend.App.Server.ClientHandler import ClientHandler
@@ -49,10 +49,11 @@ class ServerProcess:
             conn, addr = self.server.accept()
             print(conn)
             print(addr)
-            clientHandler = ClientHandler(MessageController(conn))
-            with self.lock:
-                self.client_handlers.append(clientHandler)
-                self.active_connections += 1
+            messageHandler = MessageHandler(conn)
+            messageHandler.send_initial_message()
+            clientHandler = ClientHandler(messageHandler)
+            self.client_handlers.append(clientHandler)
+            self.active_connections += 1
             print(f"Users Connected: {self.active_connections}")
 
 
@@ -119,13 +120,14 @@ class ServerProcess:
                 print(result)
                 return result
 
-            except (socket.error, ConnectionResetError):
-                print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
+            except (socket.error, ConnectionResetError, Exception):
+                print(f"\n[CONNECTION ERROR] Client {client_handler.clientModel.uuid} disconnected.")
                 client_handler.messageController.connection.close()
                 client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
                 self.active_connections -= 1
                 return None
+
 
 
     def send_to_client(self, message, uuid) -> Optional[str]:

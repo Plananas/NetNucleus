@@ -5,7 +5,6 @@ import win32serviceutil
 import win32event
 import servicemanager
 import socket
-import time
 
 from ClientApp import Client
 
@@ -25,7 +24,7 @@ class MyService(win32serviceutil.ServiceFramework):
     def SvcStop(self):
         servicemanager.LogInfoMsg(f"{SERVICE_NAME}: Stop signal received.")
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-        self.client.Connected = False
+        self.client.connected = False
         win32event.SetEvent(self.stop_event)
         servicemanager.LogInfoMsg(f"{SERVICE_NAME}: Service stopped.")
 
