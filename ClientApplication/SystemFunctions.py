@@ -11,6 +11,114 @@ def shutdown():
     #TODO set shutdown status
     return "Shutting Down"
 
+#Scoop Functions
+def get_all_software():
+    print("Getting all installed software...")
+
+    try:
+        result = subprocess.run('scoop list', shell=True, check=True, capture_output=True, text=True)
+    except Exception as e:
+        # Catch any other exceptions that might occur
+        print(f"An unexpected error occurred: {str(e)}")
+        return []
+
+    # Check if the command was successful
+    if result.returncode != 0:
+        print(f"Error: {result.stderr}")
+        print(f"Exit code: {result.returncode}")
+        return []
+
+    # Print the stdout for debugging
+    print("Command Output:")
+    print(result.stdout)
+
+    # Check if Scoop reports no installed apps
+    if "There aren't any apps installed." in result.stdout:
+        print("No software is installed.")
+        return []
+
+    installedSoftware = []
+    outputLines = result.stdout.splitlines()
+
+    process_software = False
+
+    for line in outputLines:
+        if '---' in line:
+            process_software = True  # Start processing after this line
+            continue
+
+        if not process_software or not line.strip():
+            continue  # Ignore lines before the separator or empty lines
+
+        # Example output line: 7zip 22.01  main
+        softwareDetails = re.split(r'\s+', line.strip())  # Split by whitespace
+
+        # Ensure the line has at least 2 parts (Package, Version)
+        if len(softwareDetails) >= 2:
+            name, version = softwareDetails[:2]
+            softwareEntry = {
+                'name': name,
+                'current_version': version,
+            }
+            installedSoftware.append(softwareEntry)
+
+    print(installedSoftware)
+    return installedSoftware
+
+
+def ensure_scoop_installed():
+    """
+    Checks if Scoop is installed on the system. If it is not installed,
+    installs it using a PowerShell script.
+    """
+
+    # Step 1: Check if Scoop is installed
+    try:
+        # "scoop --version" will throw FileNotFoundError if `scoop` is not on PATH
+        # or CalledProcessError if there's another execution problem
+        subprocess.run("scoop --version", shell=True, check=True, capture_output=True, text=True)
+        print("Scoop is already installed.")
+        return
+    except FileNotFoundError:
+        print("Scoop not found.")
+    except subprocess.CalledProcessError:
+        # We got a return code != 0; this may mean Scoop is not properly installed
+        print("Scoop detected but could not run. Attempting to reinstall.")
+
+    # Step 2: Install Scoop using PowerShell
+    print("Installing Scoop. This may take a few moments...")
+
+    install_cmd = (
+        r"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; "
+        r"[System.Net.ServicePointManager]::SecurityProtocol = "
+        r"[System.Net.ServicePointManager]::SecurityProtocol -bor 3072; "
+        r"iex ((New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh'))"
+    )
+
+    try:
+        subprocess.run(["powershell", "-Command", install_cmd], check=True)
+    except subprocess.CalledProcessError as e:
+        print("Installation of Scoop failed with an error:")
+        print(e)
+        return
+
+    # Step 3: Verify installation
+    try:
+        subprocess.run(["scoop", "--version"], check=True, capture_output=True)
+        print("Scoop installation successful.")
+    except Exception as e:
+        print("Scoop installation was attempted but verification failed.")
+        print(e)
+
+def install_program(program_name):
+    file_path = os.path.join(os.getcwd(), "client_installers")
+    #TODO implement the install mechanism
+
+
+
+
+
+# Chocolatey Functions
 def get_updatable_software():
     print("Getting Updatable Software...")
 
@@ -61,7 +169,7 @@ def get_updatable_software():
     return updatable_software
 
 
-def get_all_software():
+def get_all_software_chocolatey():
     print("Getting all installed software...")
     try:
         result = subprocess.run(['choco', 'list'], capture_output=True, text=True, encoding='utf-8')
@@ -124,7 +232,7 @@ def update_all_software():
         return "Chocolatey is not installed or available on this system."
 
 
-def install_program(program_name):
+def install_program_chocolatey(program_name):
     try:
         # Run the Chocolatey command to install the program
         subprocess.run(['choco', 'install', program_name, '-y', '--force'], check=True)

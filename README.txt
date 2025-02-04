@@ -1,8 +1,8 @@
 A simple program for managing a group of computers on a network
 
-- Chocolatey must be installed on the client computer
 - Program must be run in administrator mode to work
 
+Python Version 3.10
 
 List of Programs to install for testing:
 -all of these programs are in need of an update

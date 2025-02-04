@@ -1,6 +1,7 @@
 from typing import Optional
 
 from ServerApplication.Backend.App.Models.Model import Model
+from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions
 
 
 class ProgramModel(Model):
@@ -12,6 +13,13 @@ class ProgramModel(Model):
     available_version: Optional[str]
 
     unique_field = ""
+
+
+    def find_available_version(self):
+        version_number = ScoopFunctions.getUpdatableSoftware(self.name)
+        self.available_version = version_number
+        self.save()
+
 
     def to_dict(self) -> dict:
         """

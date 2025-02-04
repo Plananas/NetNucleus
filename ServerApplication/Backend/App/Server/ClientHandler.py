@@ -1,11 +1,13 @@
 import uuid
 import ast
+import os
 
 from ServerApplication.Backend.App.Models.ClientModel import ClientModel
 from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
 from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
 from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
 from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
+from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop
 
 
 class ClientHandler:
@@ -54,19 +56,18 @@ class ClientHandler:
 
     def get_available_updates(self):
         """
-        :return: Array of Software available to update
+        :return: Status of the command
         """
-        self.messageController.write(self.GET_UPGRADES_COMMAND)
-
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)
-
-        mac, programs = next(iter(responseArray.items()))
+        print("getAvailableUpdates")
+        programs = self.clientModel.get_installed_programs()
+        print("programs:")
+        print(programs)
         for program in programs:
-            print(program)
-            self.save_program(self.clientModel.get_uuid() ,program)
-
-        return responseArray
+            print("find available updates for")
+            program.find_available_version()
+            print("Getting available version number")
+            print(program.available_version)
+        return 'saved upgraded versions'
 
 
     def get_client_with_software(self) -> ClientModel :
@@ -88,14 +89,18 @@ class ClientHandler:
         """
         :return: Success Message
         """
-        self.messageController.write((self.INSTALL_SOFTWARE_COMMAND + " " + software_name))
+
+        file_path = Scoop.download_installer(software_name)
+        filename = os.path.basename(file_path)
+        self.messageController.write(self.INSTALL_SOFTWARE_COMMAND + " " + filename)
+
+        self.messageController.write_file(file_path)
 
         responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
-
-        response = responseArray[mac_address]
-
+        #responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+        #mac_address = self.clientModel.get_mac_address()
+        print(responseArray)
+        response = responseArray['mac_address']
         if not response:
             print("[ERROR] No response received for install command.")
             return None
@@ -107,7 +112,7 @@ class ClientHandler:
 
         print(response)
 
-        return responseArray
+        return "TODO: fix this"
 
     def uninstall_software(self, software_name):
         """

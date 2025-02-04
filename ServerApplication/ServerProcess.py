@@ -156,7 +156,7 @@ class ServerProcess:
                 return result
 
             except (socket.error, ConnectionResetError):
-                print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
+                print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.get_message_id()} disconnected.")
                 client_handler.messageController.connection.close()
                 client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
