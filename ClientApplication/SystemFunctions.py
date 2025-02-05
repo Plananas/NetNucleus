@@ -1,6 +1,7 @@
 import os
 import subprocess
 import re
+import shutil
 import winshell
 import win32com.client
 import sys
@@ -9,7 +10,7 @@ import sys
 def shutdown():
     #os.system('shutdown -s')#
     #TODO set shutdown status
-    return "Shutting Down"
+    return "Shutdown is deactivated"
 
 #Scoop Functions
 def get_all_software():
@@ -68,58 +69,85 @@ def get_all_software():
 
 def ensure_scoop_installed():
     """
-    Checks if Scoop is installed on the system. If it is not installed,
-    installs it using a PowerShell script.
+    Checks if Scoop is installed on the system. If it is not installed or not functioning,
+    exits the program with an error message.
     """
-
-    # Step 1: Check if Scoop is installed
     try:
-        # "scoop --version" will throw FileNotFoundError if `scoop` is not on PATH
-        # or CalledProcessError if there's another execution problem
+        # "scoop --version" will throw FileNotFoundError if `scoop` is not on PATH,
+        # or CalledProcessError if there's another execution problem.
         subprocess.run("scoop --version", shell=True, check=True, capture_output=True, text=True)
         print("Scoop is already installed.")
-        return
     except FileNotFoundError:
-        print("Scoop not found.")
+        print("Scoop not found: Please contact your administrator. Exiting program.")
+        sys.exit(1)
     except subprocess.CalledProcessError:
-        # We got a return code != 0; this may mean Scoop is not properly installed
-        print("Scoop detected but could not run. Attempting to reinstall.")
+        # We got a non-zero return code; this may mean Scoop is not properly installed.
+        print("Scoop detected but could not run. Exiting program.")
+        sys.exit(1)
 
-    # Step 2: Install Scoop using PowerShell
-    print("Installing Scoop. This may take a few moments...")
 
-    install_cmd = (
-        r"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; "
-        r"[System.Net.ServicePointManager]::SecurityProtocol = "
-        r"[System.Net.ServicePointManager]::SecurityProtocol -bor 3072; "
-        r"iex ((New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh'))"
-    )
-
-    try:
-        subprocess.run(["powershell", "-Command", install_cmd], check=True)
-    except subprocess.CalledProcessError as e:
-        print("Installation of Scoop failed with an error:")
-        print(e)
-        return
-
-    # Step 3: Verify installation
-    try:
-        subprocess.run(["scoop", "--version"], check=True, capture_output=True)
-        print("Scoop installation successful.")
-    except Exception as e:
-        print("Scoop installation was attempted but verification failed.")
-        print(e)
-
-def install_program(program_name):
+def install_program(program_full_name):
     file_path = os.path.join(os.getcwd(), "client_installers")
-    #TODO implement the install mechanism
+    program_path = os.path.join(file_path, program_full_name)
+    # /{user}/scoop/cache
+    user_home = os.path.expanduser("~")
+    scoop_cache_path = os.path.join(user_home, "scoop", "cache")
+
+    # Ensure the Scoop cache directory exists
+    if not os.path.exists(scoop_cache_path):
+        print("Error: Scoop cache directory not found.")
+        return False
+
+    # Move the program installer to the Scoop cache directory
+    destination_path = os.path.join(scoop_cache_path, program_full_name)
+    try:
+        shutil.copy(program_path, destination_path)
+        print(f"Copied {program_full_name} to {scoop_cache_path}")
+    except Exception as e:
+        print(f"Error copying file: {e}")
+        return False
+
+    # 2) run the scoop install and somehow install the new file
+    try:
+        program_name = program_full_name.split("#")[0]
+        print(f"installing {program_name}")
+        result = subprocess.run(f'scoop install {program_name}', shell=True, check=True, capture_output=True, text=True)
+        return f"Successfully installed {program_name}"
+    except Exception as e:
+        # Catch any other exceptions that might occur
+        print(f"An unexpected error occurred: {str(e)}")
+        return []
 
 
+def uninstall_program(program_name):
+    """
+    Uninstalls the specified program using Scoop and returns a success status.
+    """
 
+    scoop_command = f"scoop uninstall {program_name}"
+    try:
+        result = subprocess.run(
+            scoop_command,
+            shell=True,
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        # Check for a success message in the command output
+        if "Successfully uninstalled" in result.stdout:
+            print(f"{program_name} was successfully uninstalled.")
+            return f"{program_name} was successfully uninstalled."
+        else:
+            # If no explicit success message, we assume it executed correctly.
+            print(f"Uninstall command executed. Output:\n{result.stdout}")
+            return f"Uninstall command executed. Output:\n{result.stdout}"
+    except subprocess.CalledProcessError as e:
+        print(f"Error uninstalling {program_name}: {e.stderr}")
+        return f"Error uninstalling {program_name}: {e.stderr}"
 
 
 # Chocolatey Functions
-def get_updatable_software():
+def get_updatable_software_chocolatey():
     print("Getting Updatable Software...")
 
     # Run the choco outdated command to get the list of outdated packages
@@ -211,7 +239,7 @@ def get_all_software_chocolatey():
     return installedSoftware
 
 
-def update_software(program_name):
+def update_software_chocolatey(program_name):
     try:
         # Run the Chocolatey command to install the program
         subprocess.run(['choco', 'upgrade', program_name, '-y', '--force'], check=True)
@@ -221,7 +249,7 @@ def update_software(program_name):
     except FileNotFoundError:
         return "Chocolatey is not installed or available on this system."
 
-def update_all_software():
+def update_all_software_chocolatey():
     try:
         # Run the Chocolatey command to install the program
         subprocess.run(['choco', 'upgrade', 'all', '-y', '--force'], check=True)
@@ -243,7 +271,7 @@ def install_program_chocolatey(program_name):
         return "Chocolatey is not installed or available on this system."
 
 
-def uninstall_program(program_name):
+def uninstall_program_chocolatey(program_name):
     try:
         # Run the Chocolatey command to uninstall the program with automatic 'Yes' input
         process = subprocess.run(

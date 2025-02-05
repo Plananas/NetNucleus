@@ -12,11 +12,11 @@ class ProgramModel(Model):
     current_version: str
     available_version: Optional[str]
 
-    unique_field = ""
+    unique_field = "client_uuid,name"
 
 
     def find_available_version(self):
-        version_number = ScoopFunctions.getUpdatableSoftware(self.name)
+        version_number = ScoopFunctions.getSoftwareVersionNumber(self.name)
         self.available_version = version_number
         self.save()
 

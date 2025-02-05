@@ -144,15 +144,19 @@ class Client:
         time.sleep(0.5)
 
 
-    def get_file(self, filename):
+    def get_file(self, file_name):
         """
         Get a file from the server.
         :return:
         """
-        print("Getting File")
-        self.message_controller.read_file(filename)
-        self.message_controller.write({self.mac_address: "successfully received file"})
-        #TODO install the software next
+        try:
+            print("Getting File")
+            self.message_controller.read_file(file_name)
+
+            return SystemFunctions.install_program(file_name)
+
+        except Exception as e:
+            return "Unable to install program"
 
 
     def reconnect(self):
@@ -179,9 +183,9 @@ class Client:
         print(message)
         commands = {
             "shutdown": SystemFunctions.shutdown,
-            "upgrades": SystemFunctions.get_updatable_software,
+            #"upgrades": SystemFunctions.get_updatable_software,
             "software": SystemFunctions.get_all_software,
-            "upgrade": SystemFunctions.update_all_software
+            #"upgrade": SystemFunctions.update_all_software
         }
 
         if message.lower() in commands:
@@ -194,7 +198,7 @@ class Client:
             command, argument = split_message
             command_map = {
                 "uninstall": SystemFunctions.uninstall_program,
-                "upgrade": SystemFunctions.update_software,
+                #"upgrade": SystemFunctions.update_software,
                 "install": self.get_file,
             }
             if command.lower() in command_map:

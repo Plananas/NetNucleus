@@ -128,7 +128,6 @@ class MessageHandler:
             print("[ERROR] No file data received")
             return None
 
-        SystemFunctions.install_program(file_name)
 
 
     def save_file(self, file_size, file_name):

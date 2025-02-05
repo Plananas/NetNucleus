@@ -51,7 +51,7 @@ class ScoopFunctions:
             return None
 
     @staticmethod
-    def getUpdatableSoftware(software_name):
+    def getSoftwareVersionNumber(software_name):
         version_number = ""
 
         try:
@@ -72,7 +72,6 @@ class ScoopFunctions:
             if process.returncode != 0:
                 print(f"Error running scoop command: {stderr.strip()}")
                 return ""
-            #FIXME stdout is not able to find version
 
             ANSI_ESCAPE_PATTERN = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 

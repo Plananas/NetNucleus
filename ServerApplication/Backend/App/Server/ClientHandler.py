@@ -7,7 +7,7 @@ from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
 from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
 from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
 from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
-from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop
+from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop, ScoopFunctions
 
 
 class ClientHandler:
@@ -91,16 +91,18 @@ class ClientHandler:
         """
 
         file_path = Scoop.download_installer(software_name)
-        filename = os.path.basename(file_path)
-        self.messageController.write(self.INSTALL_SOFTWARE_COMMAND + " " + filename)
+        response = ""
+        if file_path is not None:
+            filename = os.path.basename(file_path)
 
-        self.messageController.write_file(file_path)
+            self.messageController.write(self.INSTALL_SOFTWARE_COMMAND + " " + filename)
+            self.messageController.write_file(file_path)
 
-        responseArray = self.messageController.read()
-        #responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        #mac_address = self.clientModel.get_mac_address()
-        print(responseArray)
-        response = responseArray['mac_address']
+            responseArray = self.messageController.read()
+            responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+            mac_address = self.clientModel.get_mac_address()
+            response = responseArray[mac_address]
+
         if not response:
             print("[ERROR] No response received for install command.")
             return None
@@ -110,9 +112,7 @@ class ClientHandler:
             self.get_client_with_software()
             self.get_available_updates()
 
-        print(response)
-
-        return "TODO: fix this"
+        return response
 
     def uninstall_software(self, software_name):
         """
@@ -131,8 +131,6 @@ class ClientHandler:
             self.get_client_with_software()
             self.get_available_updates()
 
-        print(response)
-
         return responseArray
 
 
@@ -140,42 +138,44 @@ class ClientHandler:
         """
         :return: Success Message
         """
-        self.messageController.write((self.UPGRADE_SOFTWARE_COMMAND + " " + software_name))
 
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
+        print(f"UPGRADE SOFTWARE {software_name}")
 
-        response = responseArray[mac_address]
+        if software_name == 'all':
+            return self.upgrade_all_software()
 
-        # Check if "Successful" is in the response
-        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
-            self.get_client_with_software()
-            self.get_available_updates()
+        programs = self.clientModel.get_installed_programs()
+        for program in programs:
+            if program.software_name == software_name:
+                version = ScoopFunctions.getSoftwareVersionNumber(software_name)
+                if version == program.software_version:
+                    return "Program is already up to date"
 
-        print(response)
-        return responseArray
+        try:
+            return self.install_software(software_name)
+        except:
+            return "Could not upgrade software"
 
 
     def upgrade_all_software(self):
         """
         :return: Success Message
         """
-        self.messageController.write(self.UPGRADE_SOFTWARE_COMMAND)
 
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
+        print("get Installed Software")
+        programs = self.clientModel.get_installed_programs()
+        print(programs)
+        response = []
+        for program in programs:
+            print(program.current_version)
+            version = ScoopFunctions.getSoftwareVersionNumber(program.name)
+            if version == program.current_version:
+                print(f"{program.name} is already up to date")
+                response.append(f"{program.name} is already up to date")
+            else:
+                response.append(self.install_software(program.software_name))
 
-        response = responseArray[mac_address]
-
-        # Check if "Successful" is in the response
-        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
-            self.get_client_with_software()
-            self.get_available_updates()
-
-        print(response)
-        return responseArray
+        return response
 
 
     def save_client(self, mac_and_software) -> ClientModel:

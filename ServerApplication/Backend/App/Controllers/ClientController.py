@@ -185,7 +185,7 @@ class ClientController:
 
     def get_upgrades(self):
 
-        response = self.server.enter_command('upgrade')
+        response = self.server.enter_command('upgrade all')
 
         return jsonify({"message": response}), 200
 

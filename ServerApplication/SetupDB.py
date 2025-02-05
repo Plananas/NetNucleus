@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS clients (
 )
 ''')
 
-# Create a table for installed programs
+# Create a table for installed programs with a unique constraint on (client_uuid, name)
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS installed_programs (
     id INTEGER PRIMARY KEY,
@@ -24,16 +24,18 @@ CREATE TABLE IF NOT EXISTS installed_programs (
     name TEXT NOT NULL,
     current_version TEXT,
     available_version TEXT,
-    FOREIGN KEY(client_uuid) REFERENCES clients(uuid) -- Add foreign key constraint
+    FOREIGN KEY(client_uuid) REFERENCES clients(uuid),
+    UNIQUE(client_uuid, name)
 )
 ''')
 
+# Create a table for users
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL
-    )
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
+)
 ''')
 
 # Insert data into installed_programs

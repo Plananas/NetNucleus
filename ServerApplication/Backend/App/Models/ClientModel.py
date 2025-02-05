@@ -34,11 +34,12 @@ class ClientModel(Model):
     def set_shutdown(self, shutdown: bool) -> None:
         self.shutdown = shutdown
 
-    def get_installed_programs(self) -> Optional[List[ProgramModel]]:
+    def get_installed_programs(self) -> List[ProgramModel]:
         program_repository = ProgramRepository()
         installed_programs = program_repository.get_program_by_client_id(self.uuid)
 
         return installed_programs
+
     @staticmethod
     def set_installed_programs(self, installed_programs: List[ProgramModel]) -> None:
         [program.save() for program in installed_programs]
