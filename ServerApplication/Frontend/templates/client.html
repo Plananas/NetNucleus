@@ -3,167 +3,175 @@
 {% block title %}Clients Table{% endblock %}
 
 {% block content %}
-<div class="container mt-2">
-    <div class="row">
-        <div class="jumbotron text-dark">
-            <h1 class="display-4">{{ client.nickname or client.mac_address }}
-            {% if client.shutdown %}
-                🔴
-            {% else %}
-                🟢
-            {% endif %}
-            </h1>
-            <br>
-            <br>
-        </div>
+<div class="container mt-4">
+  <!-- Client Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="jumbotron text-dark">
+        <h1 class="display-4">
+          {{ client.nickname or client.mac_address }}
+          {% if client.shutdown %}
+            <span class="text-danger">
+              <i class="zmdi zmdi-close-circle" style="font-size: 1.2em;"></i>
+            </span>
+          {% else %}
+            <span class="text-success">
+              <i class="zmdi zmdi-check-circle" style="font-size: 1.2em;"></i>
+            </span>
+          {% endif %}
+        </h1>
+      </div>
     </div>
-    <div class="container">
-        <div class="row">
-            <!-- Left Section -->
-            <div class="col-md-4">
-                <!-- Input Box -->
-                <div class="col-md-12">
-                    <div class="card bg-off-white shadow">
-                        <div class="card-body">
-                            <h5 class="card-title">Install Software</h5>
-                            <form id="install-software-form">
-                                <div class="input-group">
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="software-name"
-                                        placeholder="Enter software name"
-                                        required>
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary"
-                                        id="install-button">
-                                        Install
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-                <!-- Buttons Row -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <button
-                            type="button"
-                            title="Shutdown"
-                            class="card card-button shadow mb-1 hover-button border-0 bg-off-white {% if client.shutdown %}disabled-button{% endif %}"
-                            id="shutdown-button"
-                            {% if client.shutdown %}disabled{% endif %}>
-                            <div class="card-body">
-                                <h5 class="card-title zmdi zmdi-power" style="font-size: 65px"></h5>
-                                <br>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-md-6">
-                        <button
-                            type="button"
-                            class="card card-button shadow mb-1 hover-button border-0 bg-off-white {% if client.shutdown %}disabled-button{% endif %}"
-                            id="upgrades_button"
-                            {% if client.shutdown %}disabled{% endif %}>
-                                <div class="card-body">
-                                    <h5 class="card-title">Scan for Updates</h5>
-                                </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
+  </div>
 
-            <!-- Right Section (Table) -->
-            <div class="col-md-8">
-                <table class="table table-hover table-borderless">
-                    <thead class="bg-dark-blue text-off-white">
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Current Version</th>
-                            <th>Latest Version</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-off-white text-dark-blue">
-                        {% if programs %}
-                            {% for installedProgram in programs %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ installedProgram.name or "N/A" }}</td>
-                                    <td>{{ installedProgram.current_version or "N/A" }}</td>
-                                    <td>{{ installedProgram.available_version or "N/A" }}</td>
-                                    <td>
-                                        {% if installedProgram.available_version %}
-                                            <a class="btn btn-primary mb-1" id="installation-button">Upgrade</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">No installed programs available.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+  <div class="row">
+    <!-- Left Section: Controls -->
+    <div class="col-md-4">
+      <!-- Install Software Card -->
+      <div class="card mb-4 shadow-sm bg-off-white">
+        <div class="card-header bg-dark-blue text-off-white">
+          Install Software
         </div>
+        <div class="card-body">
+          <form id="install-software-form">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                id="software-name"
+                placeholder="Enter software name"
+                required>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="install-button">
+                Install
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Actions Card -->
+      <div class="card mb-4 shadow-sm bg-off-white">
+        <div class="card-header bg-dark-blue text-off-white">
+          Actions
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-around">
+            <button
+              type="button"
+              title="Shutdown"
+              class="btn btn-outline-secondary {% if client.shutdown %}disabled-button{% endif %}"
+              id="shutdown-button"
+              {% if client.shutdown %}disabled{% endif %}>
+              <i class="zmdi zmdi-power" style="font-size: 28px;"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary {% if client.shutdown %}disabled-button{% endif %}"
+              id="upgrades_button"
+              {% if client.shutdown %}disabled{% endif %}>
+              <i class="zmdi zmdi-refresh-alt" style="font-size: 28px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Right Section: Programs Table -->
+    <div class="col-md-8">
+      <div class="card shadow-sm bg-off-white">
+        <div class="card-header bg-dark-blue text-off-white">
+          Installed Programs
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-borderless mb-0">
+              <thead class="bg-dark-blue text-off-white">
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Current Version</th>
+                  <th>Latest Version</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody class="text-dark-blue">
+                {% if programs %}
+                  {% for installedProgram in programs %}
+                    <tr>
+                      <td>{{ loop.index }}</td>
+                      <td>{{ installedProgram.name or "N/A" }}</td>
+                      <td>{{ installedProgram.current_version or "N/A" }}</td>
+                      <td>{{ installedProgram.available_version or "N/A" }}</td>
+                      <td>
+                        {% if installedProgram.available_version %}
+                          <a class="btn btn-primary btn-sm" id="installation-button" href="#">
+                            Upgrade
+                          </a>
+                        {% else %}
+                          <span class="text-muted">Up to date</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">
+                      No installed programs available.
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- JavaScript Handlers -->
 <script>
-    // JavaScript to handle the button click and send a request to the backend
-    document.getElementById('shutdown-button').addEventListener('click', function() {
-        fetch('/api/clients/shutdown', {
-            method: 'POST',  // HTTP method
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                'mac': '{{ client.mac_address }}'  // Send mac_address in the body
-            })
-        })
-        .then(response => response.json())  // Parse JSON response
-        .then(data => {
-            console.log(data);  // Handle response data
-        })
-        .catch(error => console.error('Error:', error));  // Handle any errors
-    });
-        document.getElementById('install-button').addEventListener('click', function () {
-        const softwareName = document.getElementById('software-name').value;
+  // Shutdown button handler
+  document.getElementById('shutdown-button').addEventListener('click', function() {
+    fetch('/api/clients/shutdown', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 'mac': '{{ client.mac_address }}' })
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  });
 
-        if (!softwareName) {
-            alert('Please enter a software name.');
-            return;
-        }
-
-        fetch('/api/clients/install', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                'software': softwareName
-            })
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(`Software installation initiated: ${softwareName}`);
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to install software. Please try again.');
-            });
+  // Install software button handler
+  document.getElementById('install-button').addEventListener('click', function () {
+    const softwareName = document.getElementById('software-name').value;
+    if (!softwareName) {
+      alert('Please enter a software name.');
+      return;
+    }
+    fetch('/api/clients/install', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 'software': softwareName })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert(`Software installation initiated: ${softwareName}`);
+      console.log(data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to install software. Please try again.');
     });
+  });
 </script>
-
 {% endblock %}

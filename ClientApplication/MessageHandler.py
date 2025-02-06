@@ -1,8 +1,5 @@
 import uuid
 import os
-import pycurl
-import certifi
-from io import BytesIO
 
 from ClientApplication import SystemFunctions
 from ClientApplication.MessageCipherHandler import MessageCipherHandler

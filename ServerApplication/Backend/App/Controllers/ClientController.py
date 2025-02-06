@@ -76,7 +76,6 @@ class ClientController:
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Example authentication logic
         if self.server.confirm_user(self.server, username, password):  # Replace with real logic
             unique_token = secrets.token_hex(16)  # Generate a secure random token
             self.session_store[unique_token] = username  # Save the token associated with the user
@@ -96,8 +95,6 @@ class ClientController:
         clients = client_repository.get_all_clients()
         clients_as_dict = [client.to_dict() for client in clients]
         online_client_count = 0
-
-        #TODO get the common software
 
         for client in clients:
             if not client.is_shutdown():
@@ -128,6 +125,24 @@ class ClientController:
         clients = [client.to_dict() for client in client_repository.get_all_clients()]
 
         return render_template('clients.html', clients=clients)
+
+
+    @staticmethod
+    @main.route('/settings', methods=['GET'])
+    def get_settings_page():
+        return render_template('settings.html')
+
+
+    @staticmethod
+    @main.route('/rules', methods=['GET'])
+    def get_rules_page():
+        return render_template('rules.html')
+
+
+    @staticmethod
+    @main.route('/default-apps', methods=['GET'])
+    def get_default_apps_page():
+        return render_template('default-apps.html')
 
 
     @staticmethod
