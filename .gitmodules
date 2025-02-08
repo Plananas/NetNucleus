@@ -1,3 +1,6 @@
 [submodule "ClientApplication"]
 	path = ClientApplication
 	url = https://github.com/Plananas/NetNucleusClientApplication
+[submodule "OnSiteServerApplication"]
+	path = OnSiteServerApplication
+	url = https://github.com/Plananas/NetNucleusOnSiteServerApplication
