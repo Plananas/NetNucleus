@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ServerApplication.Backend.App.Models.Model import Model
-from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions
+from OnSiteServerApplication.Backend.App.Models.Model import Model
+from OnSiteServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions
 
 
 class ProgramModel(Model):

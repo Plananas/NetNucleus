@@ -2,8 +2,8 @@ import threading
 
 from flask import Flask
 
-from ServerApplication.Backend.App.Controllers.ClientController import ClientController
-from ServerApplication.ServerProcess import ServerProcess
+from OnSiteServerApplication.Backend.App.Controllers.ClientController import ClientController
+from OnSiteServerApplication.ServerProcess import ServerProcess
 
 global server
 

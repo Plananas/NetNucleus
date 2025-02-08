@@ -3,12 +3,12 @@ import uuid
 import ast
 import os
 
-from ServerApplication.Backend.App.Models.ClientModel import ClientModel
-from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
-from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
-from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
-from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
-from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop, ScoopFunctions
+from OnSiteServerApplication.Backend.App.Models.ClientModel import ClientModel
+from OnSiteServerApplication.Backend.App.Models.MessageHandler import MessageHandler
+from OnSiteServerApplication.Backend.App.Models.ProgramModel import ProgramModel
+from OnSiteServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
+from OnSiteServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
+from OnSiteServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop, ScoopFunctions
 
 class ClientHandler:
 

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from ServerApplication.Backend.App.Models.ClientModel import ClientModel
+from OnSiteServerApplication.Backend.App.Models.ClientModel import ClientModel
 
 
 class ClientRepository:

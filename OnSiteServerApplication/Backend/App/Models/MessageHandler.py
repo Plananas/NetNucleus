@@ -1,6 +1,6 @@
 import uuid
 import os
-from ServerApplication.Backend.App.Models.MessageCipherHandler import MessageCipherHandler
+from OnSiteServerApplication.Backend.App.Models.MessageCipherHandler import MessageCipherHandler
 
 
 
