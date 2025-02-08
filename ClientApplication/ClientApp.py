@@ -183,6 +183,7 @@ class Client:
         print(message)
         commands = {
             "shutdown": SystemFunctions.shutdown,
+            "statistics": SystemFunctions.get_system_statistics,
             #"upgrades": SystemFunctions.get_updatable_software,
             "software": SystemFunctions.get_all_software,
             #"upgrade": SystemFunctions.update_all_software
@@ -214,6 +215,7 @@ class Client:
             self.client.close()
         except Exception as e:
             print(f"[CLEANUP ERROR] {e}")
+
 
 
 if __name__ == "__main__":

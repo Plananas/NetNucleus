@@ -3,6 +3,13 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<style>
+  /* Change the background of table rows on hover */
+  .table-borderless tbody tr:hover {
+    background-color: #dcdcdc; /* Adjust this color to fit your design */
+  }
+</style>
+
 <div class="container mt-4">
   <!-- Dashboard Header -->
   <div class="row">
@@ -78,11 +85,13 @@
                 <tr>
                   <th scope="col">Device Name</th>
                   <th scope="col">Status</th>
+                  <th scope="col">Logged In User</th>
+                  <th scope="col">Storage</th>
                 </tr>
               </thead>
               <tbody>
                 {% for client in clients %}
-                <tr>
+                <tr style="cursor: pointer;" onclick="window.location='/clients/{{ client.mac_address }}'">
                   <td>{{ client.nickname or client.mac_address }}</td>
                   {% if client.shutdown %}
                   <td>
@@ -93,6 +102,25 @@
                     <i class="zmdi zmdi-check-circle" style="font-size: 1.2em; color: #00cc00;"></i> Online
                   </td>
                   {% endif %}
+                  <td>
+                    {{ client.current_user or "N/A" }}
+                  </td>
+                  <td>
+                    {% if client.storage %}
+                      {% set storage_values = client.storage.split('/') %}
+                      {% set used_storage = storage_values[0] | int %}
+                      {% set total_storage = storage_values[1] | int %}
+                      {% set storage_percent = (used_storage / total_storage * 100) | round %}
+                      <div class="progress" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ storage_percent }}%;" aria-valuenow="{{ storage_percent }}" aria-valuemin="0" aria-valuemax="100">
+                          {{ used_storage }}GB
+                        </div>
+                      </div>
+                      <small class="text-muted">{{ used_storage }}GB used of {{ total_storage }}GB</small>
+                    {% else %}
+                      <span>N/A</span>
+                    {% endif %}
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>

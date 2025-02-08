@@ -12,7 +12,12 @@ class ClientModel(Model):
     mac_address: str
     nickname: Optional[str]
     shutdown: bool
-    updatable_programs: Optional[List[str]]
+    storage: str
+    firewall_status: str
+    windows_version: str
+    windows_version_number: str
+    bitlocker_status: str
+    current_user: str
 
     unique_field = ""
 
@@ -34,6 +39,9 @@ class ClientModel(Model):
     def set_shutdown(self, shutdown: bool) -> None:
         self.shutdown = shutdown
 
+    def set_current_user(self, current_user: str) -> None:
+        self.current_user = current_user
+
     def get_installed_programs(self) -> List[ProgramModel]:
         program_repository = ProgramRepository()
         installed_programs = program_repository.get_program_by_client_id(self.uuid)
@@ -53,5 +61,10 @@ class ClientModel(Model):
             "mac_address": self.mac_address,
             "nickname": self.nickname,
             "shutdown": self.shutdown,
-            "updatable_programs": self.updatable_programs,
+            "storage": self.storage,
+            "firewall_status": self.firewall_status,
+            "windows_version": self.windows_version,
+            "windows_version_number": self.windows_version_number,
+            "bitlocker_status": self.bitlocker_status,
+            "current_user": self.current_user,
         }

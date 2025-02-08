@@ -1,3 +1,4 @@
+import json
 import uuid
 import ast
 import os
@@ -9,12 +10,12 @@ from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRe
 from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
 from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop, ScoopFunctions
 
-
 class ClientHandler:
 
     SHUTDOWN_COMMAND = "shutdown"
     GET_UPGRADES_COMMAND = "upgrades"
     GET_ALL_SOFTWARE_COMMAND = "software"
+    GET_ALL_STATS_COMMAND = "statistics"
     INSTALL_SOFTWARE_COMMAND = "install"
     UNINSTALL_SOFTWARE_COMMAND = "uninstall"
     UPGRADE_SOFTWARE_COMMAND = "upgrade"
@@ -74,13 +75,18 @@ class ClientHandler:
         """
         :return: Array of Software
         """
-        self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
 
-        responseArray = self.messageController.read()
+        self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
+        installed_software = self.messageController.read()
+        self.messageController.write(self.GET_ALL_STATS_COMMAND)
+        computer_statistics = self.messageController.read()
+
         print("RESPONSE ARRAY")
-        print(responseArray)
-        responseArray = ast.literal_eval(responseArray)
-        client = self.save_client(responseArray)
+        print(installed_software)
+        print(computer_statistics)
+        installed_software = ast.literal_eval(installed_software)
+        computer_statistics = ast.literal_eval(computer_statistics)
+        client = self.save_new_client(installed_software, computer_statistics)
 
         return client
 
@@ -178,10 +184,11 @@ class ClientHandler:
         return response
 
 
-    def save_client(self, mac_and_software) -> ClientModel:
+    def save_new_client(self, mac_and_software, computer_statistics) -> ClientModel:
         mac_address = next(iter(mac_and_software))
         client_repository = ClientRepository()
         existing_client = client_repository.get_client_by_mac_address(mac_address)
+        computer_statistics = computer_statistics[mac_address]
 
         if existing_client:
             client_uuid = existing_client[0].get_uuid()  # Assuming the existing client has a 'uuid' field
@@ -191,13 +198,18 @@ class ClientHandler:
         else:
             client_uuid = str(uuid.uuid4())
             print('Client does not exist: Creating Model')
-
+            storage =  str(computer_statistics['storage']['current']) + '/' + str(computer_statistics['storage']['max'])
             self.clientModel: ClientModel = ClientModel(
                 uuid=client_uuid,
                 mac_address=mac_address,
                 nickname='',
                 shutdown=False,
-                updatable_programs=''
+                storage=storage,
+                firewall_status=json.dumps(computer_statistics['firewall_status']),
+                windows_version=computer_statistics['operating_system_information']['windows'],
+                windows_version_number=computer_statistics['operating_system_information']['windows_version_number'],
+                bitlocker_status=json.dumps(computer_statistics['bitlocker_status']),
+                current_user=str(computer_statistics['user']),
             )
             self.clientModel.save()
             existing_client = [self.clientModel]

@@ -1,3 +1,4 @@
+import json
 import threading
 import secrets
 
@@ -155,8 +156,15 @@ class ClientController:
         # Attempt to retrieve the client by nickname
         client = client_repository.get_client_by_mac_address(mac_address)[0]
 
-        # Convert list of ClientModel instances to list of dictionaries
         programs = [program.to_dict() for program in client.get_installed_programs()]
+        try:
+            client.firewall_status = json.loads(client.firewall_status)
+        except Exception:
+            client.firewall_status = {}
+        try:
+            client.bitlocker_status = json.loads(client.bitlocker_status)
+        except Exception:
+            client.bitlocker_status = {}
 
         if client is None:
             return jsonify({"error": f"No client found with nickname '{mac_address}'"}), 404
