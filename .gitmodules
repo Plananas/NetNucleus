@@ -4,3 +4,6 @@
 [submodule "OnSiteServerApplication"]
 	path = OnSiteServerApplication
 	url = https://github.com/Plananas/NetNucleusOnSiteServerApplication
+[submodule "Overseer"]
+	path = Overseer
+	url = https://github.com/Plananas/NetNucleusOverseer
