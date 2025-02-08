@@ -17,7 +17,11 @@ class Client:
     def __init__(self):
         self.ensure_dependencies()
         self.PORT = 50000
-        self.SERVER = self.get_server_ip()
+
+        #FIXME this static address only works after installation
+        # change this back before final product
+        #self.SERVER = self.get_server_ip()
+        self.SERVER = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER, self.PORT)
         self.message_controller = MessageHandler(object)
         self.connected = False
@@ -30,7 +34,7 @@ class Client:
         Ensure that required dependencies are installed.
         :return:
         """
-        SystemFunctions.ensure_chocolatey_installed()
+        SystemFunctions.ensure_scoop_installed()
 
 
     def configure_socket(self):
@@ -108,7 +112,7 @@ class Client:
         :return:
         """
         print("\n[LISTENING FOR MESSAGES]")
-        while self.connected:
+        while self.connected: 
             try:
                 msg = self.message_controller.read()
                 if msg:
@@ -132,10 +136,27 @@ class Client:
         :return:
         """
         if not message:
-            print("Please don't send empty strings. It breaks the server.")
+            message = "No response"
             return
+        print("Sending Message")
+        print(message)
         self.message_controller.write({self.mac_address: message})
         time.sleep(0.5)
+
+
+    def get_file(self, file_name):
+        """
+        Get a file from the server.
+        :return:
+        """
+        try:
+            print("Getting File")
+            self.message_controller.read_file(file_name)
+
+            return SystemFunctions.install_program(file_name)
+
+        except Exception as e:
+            return "Unable to install program"
 
 
     def reconnect(self):
@@ -159,23 +180,27 @@ class Client:
         :return:
         """
         print("\n[MESSAGE PROCESSING]")
+        print(message)
         commands = {
             "shutdown": SystemFunctions.shutdown,
-            "upgrades": SystemFunctions.get_updatable_software,
+            "statistics": SystemFunctions.get_system_statistics,
+            #"upgrades": SystemFunctions.get_updatable_software,
             "software": SystemFunctions.get_all_software,
-            "upgrade": SystemFunctions.update_all_software,
+            #"upgrade": SystemFunctions.update_all_software
         }
 
         if message.lower() in commands:
             return commands[message.lower()]()
 
         split_message = message.split()
+        print(split_message)
+        print("split message section")
         if len(split_message) == 2:
             command, argument = split_message
             command_map = {
-                "install": SystemFunctions.install_program,
                 "uninstall": SystemFunctions.uninstall_program,
-                "upgrade": SystemFunctions.update_software,
+                #"upgrade": SystemFunctions.update_software,
+                "install": self.get_file,
             }
             if command.lower() in command_map:
                 return command_map[command.lower()](argument)
@@ -190,6 +215,7 @@ class Client:
             self.client.close()
         except Exception as e:
             print(f"[CLEANUP ERROR] {e}")
+
 
 
 if __name__ == "__main__":

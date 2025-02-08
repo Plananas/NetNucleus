@@ -1,3 +1,4 @@
+import json
 import threading
 import secrets
 
@@ -76,7 +77,6 @@ class ClientController:
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Example authentication logic
         if self.server.confirm_user(self.server, username, password):  # Replace with real logic
             unique_token = secrets.token_hex(16)  # Generate a secure random token
             self.session_store[unique_token] = username  # Save the token associated with the user
@@ -96,8 +96,6 @@ class ClientController:
         clients = client_repository.get_all_clients()
         clients_as_dict = [client.to_dict() for client in clients]
         online_client_count = 0
-
-        #TODO get the common software
 
         for client in clients:
             if not client.is_shutdown():
@@ -131,6 +129,24 @@ class ClientController:
 
 
     @staticmethod
+    @main.route('/settings', methods=['GET'])
+    def get_settings_page():
+        return render_template('settings.html')
+
+
+    @staticmethod
+    @main.route('/rules', methods=['GET'])
+    def get_rules_page():
+        return render_template('rules.html')
+
+
+    @staticmethod
+    @main.route('/default-apps', methods=['GET'])
+    def get_default_apps_page():
+        return render_template('default-apps.html')
+
+
+    @staticmethod
     @main.route('/clients/<string:mac_address>', methods=['GET'])
     def get_client_by_mac_page(mac_address):
         """Endpoint to return a single client by name."""
@@ -140,8 +156,15 @@ class ClientController:
         # Attempt to retrieve the client by nickname
         client = client_repository.get_client_by_mac_address(mac_address)[0]
 
-        # Convert list of ClientModel instances to list of dictionaries
         programs = [program.to_dict() for program in client.get_installed_programs()]
+        try:
+            client.firewall_status = json.loads(client.firewall_status)
+        except Exception:
+            client.firewall_status = {}
+        try:
+            client.bitlocker_status = json.loads(client.bitlocker_status)
+        except Exception:
+            client.bitlocker_status = {}
 
         if client is None:
             return jsonify({"error": f"No client found with nickname '{mac_address}'"}), 404
@@ -185,7 +208,7 @@ class ClientController:
 
     def get_upgrades(self):
 
-        response = self.server.enter_command('upgrade')
+        response = self.server.enter_command('upgrade all')
 
         return jsonify({"message": response}), 200
 

@@ -1,6 +1,11 @@
-Flask
-getmac
+Flask~=3.1.0
+getmac~=0.9.5
 pywin32
-winshell
+winshell~=0.6
 pyinstaller
-pycryptodome
+pycryptodome~=3.21.0
+requests~=2.32.3
+bs4~=0.0.2
+beautifulsoup4~=4.12.3
+Werkzeug~=3.1.3
+wmi

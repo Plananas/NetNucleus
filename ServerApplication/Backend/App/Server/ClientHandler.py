@@ -1,18 +1,21 @@
+import json
 import uuid
 import ast
+import os
 
 from ServerApplication.Backend.App.Models.ClientModel import ClientModel
 from ServerApplication.Backend.App.Models.MessageHandler import MessageHandler
 from ServerApplication.Backend.App.Models.ProgramModel import ProgramModel
 from ServerApplication.Backend.App.Repositories.ClientRepository import ClientRepository
 from ServerApplication.Backend.App.Repositories.ProgramRepository import ProgramRepository
-
+from ServerApplication.Backend.App.Server.ScoopFunctions import ScoopFunctions as Scoop, ScoopFunctions
 
 class ClientHandler:
 
     SHUTDOWN_COMMAND = "shutdown"
     GET_UPGRADES_COMMAND = "upgrades"
     GET_ALL_SOFTWARE_COMMAND = "software"
+    GET_ALL_STATS_COMMAND = "statistics"
     INSTALL_SOFTWARE_COMMAND = "install"
     UNINSTALL_SOFTWARE_COMMAND = "uninstall"
     UPGRADE_SOFTWARE_COMMAND = "upgrade"
@@ -54,32 +57,36 @@ class ClientHandler:
 
     def get_available_updates(self):
         """
-        :return: Array of Software available to update
+        :return: Status of the command
         """
-        self.messageController.write(self.GET_UPGRADES_COMMAND)
-
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)
-
-        mac, programs = next(iter(responseArray.items()))
+        print("getAvailableUpdates")
+        programs = self.clientModel.get_installed_programs()
+        print("programs:")
+        print(programs)
         for program in programs:
-            print(program)
-            self.save_program(self.clientModel.get_uuid() ,program)
-
-        return responseArray
+            print("find available updates for")
+            program.find_available_version()
+            print("Getting available version number")
+            print(program.available_version)
+        return 'saved upgraded versions'
 
 
     def get_client_with_software(self) -> ClientModel :
         """
         :return: Array of Software
         """
-        self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
 
-        responseArray = self.messageController.read()
+        self.messageController.write(self.GET_ALL_SOFTWARE_COMMAND)
+        installed_software = self.messageController.read()
+        self.messageController.write(self.GET_ALL_STATS_COMMAND)
+        computer_statistics = self.messageController.read()
+
         print("RESPONSE ARRAY")
-        print(responseArray)
-        responseArray = ast.literal_eval(responseArray)
-        client = self.save_client(responseArray)
+        print(installed_software)
+        print(computer_statistics)
+        installed_software = ast.literal_eval(installed_software)
+        computer_statistics = ast.literal_eval(computer_statistics)
+        client = self.save_new_client(installed_software, computer_statistics)
 
         return client
 
@@ -88,13 +95,19 @@ class ClientHandler:
         """
         :return: Success Message
         """
-        self.messageController.write((self.INSTALL_SOFTWARE_COMMAND + " " + software_name))
 
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
+        file_path = Scoop.download_installer(software_name)
+        response = ""
+        if file_path is not None:
+            filename = os.path.basename(file_path)
 
-        response = responseArray[mac_address]
+            self.messageController.write(self.INSTALL_SOFTWARE_COMMAND + " " + filename)
+            self.messageController.write_file(file_path)
+
+            responseArray = self.messageController.read()
+            responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
+            mac_address = self.clientModel.get_mac_address()
+            response = responseArray[mac_address]
 
         if not response:
             print("[ERROR] No response received for install command.")
@@ -105,9 +118,7 @@ class ClientHandler:
             self.get_client_with_software()
             self.get_available_updates()
 
-        print(response)
-
-        return responseArray
+        return response
 
     def uninstall_software(self, software_name):
         """
@@ -126,8 +137,6 @@ class ClientHandler:
             self.get_client_with_software()
             self.get_available_updates()
 
-        print(response)
-
         return responseArray
 
 
@@ -135,48 +144,51 @@ class ClientHandler:
         """
         :return: Success Message
         """
-        self.messageController.write((self.UPGRADE_SOFTWARE_COMMAND + " " + software_name))
 
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
+        print(f"UPGRADE SOFTWARE {software_name}")
 
-        response = responseArray[mac_address]
+        if software_name == 'all':
+            return self.upgrade_all_software()
 
-        # Check if "Successful" is in the response
-        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
-            self.get_client_with_software()
-            self.get_available_updates()
+        programs = self.clientModel.get_installed_programs()
+        for program in programs:
+            if program.software_name == software_name:
+                version = ScoopFunctions.getSoftwareVersionNumber(software_name)
+                if version == program.software_version:
+                    return "Program is already up to date"
 
-        print(response)
-        return responseArray
+        try:
+            return self.install_software(software_name)
+        except:
+            return "Could not upgrade software"
 
 
     def upgrade_all_software(self):
         """
         :return: Success Message
         """
-        self.messageController.write(self.UPGRADE_SOFTWARE_COMMAND)
 
-        responseArray = self.messageController.read()
-        responseArray = ast.literal_eval(responseArray)  # Assuming it's a string representation of a list
-        mac_address = self.clientModel.get_mac_address()
+        print("get Installed Software")
+        programs = self.clientModel.get_installed_programs()
+        print(programs)
+        response = []
+        for program in programs:
+            print(program.current_version)
+            version = ScoopFunctions.getSoftwareVersionNumber(program.name)
+            if version == program.current_version:
+                print(f"{program.name} is already up to date")
+                response.append(f"{program.name} is already up to date")
+            else:
+                response.append(self.install_software(program.software_name))
 
-        response = responseArray[mac_address]
-
-        # Check if "Successful" is in the response
-        if self.SUCCESSFUL_UPGRADE_MESSAGE in response:
-            self.get_client_with_software()
-            self.get_available_updates()
-
-        print(response)
-        return responseArray
+        return response
 
 
-    def save_client(self, mac_and_software) -> ClientModel:
+    def save_new_client(self, mac_and_software, computer_statistics) -> ClientModel:
         mac_address = next(iter(mac_and_software))
         client_repository = ClientRepository()
         existing_client = client_repository.get_client_by_mac_address(mac_address)
+        computer_statistics = computer_statistics[mac_address]
 
         if existing_client:
             client_uuid = existing_client[0].get_uuid()  # Assuming the existing client has a 'uuid' field
@@ -186,13 +198,18 @@ class ClientHandler:
         else:
             client_uuid = str(uuid.uuid4())
             print('Client does not exist: Creating Model')
-
+            storage =  str(computer_statistics['storage']['current']) + '/' + str(computer_statistics['storage']['max'])
             self.clientModel: ClientModel = ClientModel(
                 uuid=client_uuid,
                 mac_address=mac_address,
                 nickname='',
                 shutdown=False,
-                updatable_programs=''
+                storage=storage,
+                firewall_status=json.dumps(computer_statistics['firewall_status']),
+                windows_version=computer_statistics['operating_system_information']['windows'],
+                windows_version_number=computer_statistics['operating_system_information']['windows_version_number'],
+                bitlocker_status=json.dumps(computer_statistics['bitlocker_status']),
+                current_user=str(computer_statistics['user']),
             )
             self.clientModel.save()
             existing_client = [self.clientModel]

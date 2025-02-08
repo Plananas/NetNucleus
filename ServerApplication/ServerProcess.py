@@ -101,24 +101,23 @@ class ServerProcess:
                 time.sleep(1)
 
                 # Send the message to each client in the list
-                return self.broadcast(splitMessage)
+                return str(self.broadcast(splitMessage))
 
         except KeyboardInterrupt:
             print("\n[INFO] Interrupted by user. Exiting.")
 
 
-    def broadcast(self, message) -> Optional[str]:
+    def broadcast(self, message):
         """
         Broadcast to every connected client
         :param message:
         :return:
         """
-        print(message)
+        responses = []
         for index, client_handler in enumerate(self.client_handlers):
             try:
                 result = self.process_messages(message, client_handler)
-                print(result)
-                return result
+                responses.append(result)
 
             except (socket.error, ConnectionResetError, Exception):
                 print(f"\n[CONNECTION ERROR] Client {client_handler.clientModel.uuid} disconnected.")
@@ -128,6 +127,7 @@ class ServerProcess:
                 self.active_connections -= 1
                 return None
 
+        return responses
 
 
     def send_to_client(self, message, uuid) -> Optional[str]:
@@ -156,7 +156,7 @@ class ServerProcess:
                 return result
 
             except (socket.error, ConnectionResetError):
-                print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.messageId} disconnected.")
+                print(f"\n[CONNECTION ERROR] Client {client_handler.messageController.get_message_id()} disconnected.")
                 client_handler.messageController.connection.close()
                 client_handler.set_shutdown()
                 self.client_handlers.remove(client_handler)
@@ -173,8 +173,6 @@ class ServerProcess:
                 return client_handler.get_available_updates()
             elif message[0].lower() == "software":
                 return client_handler.get_client_with_software()
-            elif message[0].lower() == "upgrade":
-                return client_handler.upgrade_all_software()
 
             if len(message) >= 2:
                 if message[0].lower() == "install":
