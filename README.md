@@ -10,10 +10,9 @@ versions:
 ## Introduction
 
 NetNucleus is designed for educators and administrators who 
-need an efficient way to manage classroom activities, schedules, 
-and assignments. This repository provides both the client application
-and a set of service automation tools. To follow along, you should have 
-basic knowledge of Python and web development.
+need an efficient way to manage a classrooms computer software, and shutdown schedules. 
+This repository provides both the client application
+and a set of service automation tools.
 
 ## Features
 
