@@ -1,88 +1,39 @@
 ---
-title: NetNucleus
-shortTitle: <subject> # Max 31 characters
-intro: 'Article intro. See tips for a great intro below'
-product: "{{ optional product callout }}"
-topics:
-  - <topic> # One or more from list of allowed topics: https://github.com/github/docs/blob/main/data/allowed-topics.js
+Name: NetNucleus
+Description: A Small Web Application for managing a classroom environment # Max 31 characters
 versions:
   - 0.1
 ---
 
-{% comment %}
 - A Simple Web application for managing a classroom environment
-{% endcomment %}
 
 ## Introduction
 
-{% comment %}
-The language guide introduction should include the following in a short paragraph -
-- Clarify audience.
-- State prerequisites and prior knowledge needed.
-- Should the user have read any other articles?
-- State what the user will accomplish or build and the user problem it solves.
-{% endcomment %}
+NetNucleus is designed for educators and administrators who 
+need an efficient way to manage classroom activities, schedules, 
+and assignments. This repository provides both the client application
+and a set of service automation tools. To follow along, you should have 
+basic knowledge of Python and web development.
 
-## Starting with the <language> workflow template
+## Features
 
-{% comment %}
-Language guides typically walk through and build upon a workflow template. If that format doesn't work, you can include a boilerplate workflow.
-- Link to the GitHub Actions CI workflow template as the boilerplate reference code and then walk through and build on that code in this guide - https://github.com/actions/starter-workflows/tree/master/ci
-- Provide instructions for adding the workflow template to a repository.
-- Include the starter template workflow code.
-{% endcomment %}
+- **User-friendly interface:** Easy management of classroom activities.
+- **Service automation:** Simple commands to install, start, stop, and remove the service.
+- **Cross-platform support:** Works on multiple operating systems.
 
-## Running on different operating systems
+## Getting Started
 
-{% comment %}
-Include a brief overview of how to choose the runner environment. These should be alternatives to what operating system is presented in the workflow template/boilerplate template.
-{% endcomment %}
+### Prerequisites
+- Python 3.10
+- Dependencies listed in the requirements.txt file
 
-## Configuring the <language> version
+### Installation
 
-{% comment %}
-- Describe when and how to use available setup actions that configure the version of the language on the runner (ex. actions/setup-node).
-- How does the setup action configure the version and what happens when the version isn't supported in the environment. What is the default version, when no version is configured.
-- Include any additional features the setup action might provide that are useful to CI.
-- If applicable, provide examples of configuring exact versions or major/minor versions.
-- Include information about software already installed on GitHub-hosted runners or software configuration necessary to build and test the project.
-- Provide examples of configuring matrix strategies.
-- Link out to any docs about available software on the GitHub-hosted runners. (Ex. https://docs.github.com/en/actions/reference/software-installed-on-github-hosted-runners).
-- Include code samples.
-{% endcomment %}
+1. **Clone the repository:**
 
-## Installing dependencies
-
-{% comment %}
-- Include example of installing dependencies to prepare for building and testing.
-- Are there any dependencies or scenarios where people might need to install packages globally?
-- Include examples of common package managers.
-- If the language is supported by GitHub Packages, include an example installing dependencies from GitHub.
-- Include code samples.
-{% endcomment %}
-
-## Caching dependencies
-
-{% comment %}
-Include an example of restoring cached dependencies. We'll want to link out to the article about caching for more information (https://docs.github.com/en/actions/configuring-and-managing-workflows/caching-dependencies-to-speed-up-workflows).
-{% endcomment %}
-
-## Building your code
-
-{% comment %}
-- Include any compile steps.
-- Include any test commands.
-- Note that you can use the same commands that your repository needs to build and test your code by simply replacing the commands in the `run` keyword.
-- Include any basic examples or commands specific to test frameworks.
-- Include any common databases or services that might be needed. If so, we can link out to the services guides in the docs (https://docs.github.com/en/actions/configuring-and-managing-workflows/using-databases-and-service-containers).
-{% endcomment %}
-
-## Packaging workflow data as artifacts
-
-{% comment %}
-This section can simply link out to https://docs.github.com/en/actions/configuring-and-managing-workflows/persisting-workflow-data-using-artifacts or provide additional information about which artifacts might be typical to upload for a CI workflow.
-{% endcomment %}
-
+   ```bash
+   git clone https://github.com/yourusername/NetNucleus.git
+   cd NetNucleus
 some handy tools:
 services.msc
 event viewer
