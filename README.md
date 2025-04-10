@@ -1,11 +1,6 @@
----
-Name: NetNucleus
-Description: A Small Web Application for managing a classroom environment # Max 31 characters
-versions:
-  - 0.1
----
+# Netnucleus
 
-- A Simple Web application for managing a classroom environment
+A Simple Web application for managing a classroom environment
 
 ## Introduction
 
@@ -17,31 +12,103 @@ and a set of service automation tools.
 ## Features
 
 - **User-friendly interface:** Easy management of classroom activities.
-- **Service automation:** Simple commands to install, start, stop, and remove the service.
-- **Cross-platform support:** Works on multiple operating systems.
+- **Shutdown Computers:** Ability to shutdown computers from a remote location.
+- **Install Software and Updates:** Either to all computers or a chosen device.
+- **Device Statistics:** View the storage, Firewall Status, Bitlocker Status, and Logged in user for a device.
+  
 
 ## Getting Started
 
 ### Prerequisites
+
+ ```bash
+ git clone https://github.com/Plananas/NetNucleus.git
+ ```
+
+#### **On Site Server**
+- Docker Engine
+- Windows Professional, Education, Server, Enterprise
+OR
+- Python 3.10 
+- Python packages listed in requirements.txt
+
+#### **Client Application**
 - Python 3.10
-- Dependencies listed in the requirements.txt file
+- Python packages listed in requirements.txt
+
+#### **Overseer Server**
+- Docker Engine
+- Windows Professional, Education, Server, Enterprise
+OR
+- Python 3.10
+- Python packages listed in requirements.txt
+
+---
 
 ### Installation
 
-1. **Clone the repository:**
+#### **On Site Server**
 
-   ```bash
-   git clone https://github.com/yourusername/NetNucleus.git
-   cd NetNucleus
-some handy tools:
-services.msc
-event viewer
+1. **Open Directory:**
+ ```bash
+ cd NetNucleus/ClientApplication
+ ```
 
+3. **Open Docker Engine**
+Run the docker engine for windows containers
 
-These commands get the service running as a python script:
-python .\NetworkAutomationService.py install
-python .\NetworkAutomationService.py start
-python .\NetworkAutomationService.py stop
-python .\NetworkAutomationService.py remove
+4. **Run the Docker Box**  
+```bash
+docker compose up --build
+```
+
+4. **Add Address to hosts file**
+```bash
+./addHosts.sh
+```
+
+---
+
+#### **Client Application**
+
+1. **Open Directory**
+ ```bash
+ cd NetNucleus/ClientApplication
+ ```
+
+2. **Set the server IP Address**
+Add a value to the line `SERVER_ADDRESS` in the .env file
+
+3. **Run the Python File**
+```bash
+python ClientApp.py
+```
+---
+
+#### **Overseer**
+
+1. **Open Directory:**
+ ```bash
+ cd NetNucleus/Overseer
+ ```
+
+3. **Open Docker Engine**
+Run the docker engine for windows containers
+
+4. **Run the Docker Box**  
+```bash
+docker compose up --build
+```
+
+4. **Add Address to hosts file**
+```bash
+./addHosts.sh
+```
+
+---
+
+## Future Updates
+
+- **Automation Rules:** Set timed update scans/ shutdowns
 
 
