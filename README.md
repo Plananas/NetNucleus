@@ -28,7 +28,7 @@ and a set of service automation tools.
 #### **On Site Server**
 - Docker Engine
 - Windows Professional, Education, Server, Enterprise
-OR
+<br /> **OR**
 - Python 3.10 
 - Python packages listed in requirements.txt
 
@@ -44,7 +44,7 @@ Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 #### **Overseer Server**
 - Docker Engine
 - Windows Professional, Education, Server, Enterprise
-OR
+<br /> **OR**
 - Python 3.10
 - Python packages listed in requirements.txt
 
@@ -94,13 +94,13 @@ python ClientApp.py
 ```
 **Windows Service**
 ```bash
-python .\NetworkAutomationService.py install
-python .\NetworkAutomationService.py start
+python NetworkAutomationService.py install
+python NetworkAutomationService.py start
 ```
 **Remove/Stop Windows Service**
 ```bash
-python .\NetworkAutomationService.py stop
-python .\NetworkAutomationService.py remove
+python NetworkAutomationService.py stop
+python NetworkAutomationService.py remove
 ```
 ---
 
