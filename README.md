@@ -35,6 +35,11 @@ OR
 #### **Client Application**
 - Python 3.10
 - Python packages listed in requirements.txt
+- Scoop
+```bash
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+```
 
 #### **Overseer Server**
 - Docker Engine
