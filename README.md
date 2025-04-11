@@ -76,17 +76,31 @@ docker compose up --build
 
 #### **Client Application**
 
-1. **Open Directory**
+1. **Open Directory:** 
  ```bash
  cd NetNucleus/ClientApplication
  ```
 
-2. **Set the server IP Address**
+2. **Set the server IP Address:** 
 Add a value to the line `SERVER_ADDRESS` in the .env file
 
-3. **Run the Python File**
+3. **Run the Python File:** 
+You can either run it directly through python as a terminal application (good for testing purposes) <br />
+Or you can run it as a windows service, it will run in the background and be available to run on startup <br />
+
+**Python Terminal App**
 ```bash
 python ClientApp.py
+```
+**Windows Service**
+```bash
+python .\NetworkAutomationService.py install
+python .\NetworkAutomationService.py start
+```
+**Remove/Stop Windows Service**
+```bash
+python .\NetworkAutomationService.py stop
+python .\NetworkAutomationService.py remove
 ```
 ---
 
