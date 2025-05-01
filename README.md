@@ -162,3 +162,5 @@ The set of REST endpoints available in the application.
 
 - **Automation Rules:** Set timed update scans/ shutdowns
 - **Default Applications:"" Customizable application list to be downloaded on new devices
+
+
