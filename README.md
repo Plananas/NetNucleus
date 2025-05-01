@@ -125,9 +125,42 @@ docker compose up --build
 ```
 
 ---
+## Terminal Application
+The terminal commands can only be ran on the server hosting this application.
+
+### Commands
+
+| Command                                 | Description                                                                 |
+|-----------------------------------------|-----------------------------------------------------------------------------|
+| `shutdown`                              | Shuts down all connected client machines.                                  |
+| `shutdown <client_id>`                  | Shuts down the specified client by UUID.                                   |
+| `install <software> <client_id>`        | Installs the specified software on the given client machine.               |
+| `install <software>`                    | Installs the specified software on all connected clients.                  |
+| `upgrade <software> <client_id>`        | Upgrades the specified software on the given client machine.               |
+| `upgrades <client_id>`                  | Upgrades all upgradable software on the given client machine.              |
+| `software <client_id>`                  | Displays a list of installed software on the specified client in JSON.     |
+| `uninstall <software> <client_id>`      | Uninstalls the specified software from the given client machine.           |
+| `createuser <username>:<password>`      | Creates a new user account with the given credentials.                     |
+
+---
+## API
+The set of REST endpoints available in the application. 
+### Endpoints
+| Endpoint                      | Method | Description                                                                 |
+|------------------------------|--------|-----------------------------------------------------------------------------|
+| `/api/clients/shutdown`      | POST   | Shuts down all clients, or a specific list if `clients` array is provided. |
+| `/api/clients/install`       | POST   | Installs the specified software on a client. Requires `software` and `uuid`.|
+| `/api/clients/uninstall`     | POST   | Uninstalls the specified software from a client. Requires `software` and `uuid`.|
+| `/api/clients/upgrade`       | POST   | Upgrades specified software on a given client. Requires `software` and `uuid`.|
+| `/api/clients/upgrades`      | POST   | Without a body: upgrades all software on all clients. With UUID: upgrades software on one.|
+| `/api/clients/software`      | POST   | Returns installed software on a client in JSON. Requires `uuid`.            |
+
+---
+
 
 ## Future Updates
 
 - **Automation Rules:** Set timed update scans/ shutdowns
+- **Default Applications:"" Customizable application list to be downloaded on new devices
 
 
